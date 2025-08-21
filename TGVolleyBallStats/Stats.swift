@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Stats {
+enum Stats: String, CaseIterable, Identifiable {
     case serve0
     case serve1
     case serve2
@@ -39,6 +39,8 @@ enum Stats {
     case dig1
     case dig2
     case dig3
+    
+    var id: String { rawValue }
     
     /// Determines if a stat is offensive or defensive
     /// - Returns: bool with the result of if the stat is offensive or defensive
