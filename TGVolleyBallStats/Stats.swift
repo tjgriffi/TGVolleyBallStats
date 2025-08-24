@@ -39,6 +39,7 @@ enum Stats: String, CaseIterable, Identifiable {
     case dig1
     case dig2
     case dig3
+    case none
     
     var id: String { rawValue }
     

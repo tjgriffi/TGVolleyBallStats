@@ -9,8 +9,27 @@ import Foundation
 import SwiftUI
 
 enum Route: Hashable {
-    case addRally
+    case addRally(setViewModel: Binding<SetViewModel>)
     case gameScreen
+    
+    // TODO: See what this is doing
+    nonisolated static func == (lhs: Route, rhs: Route) -> Bool {
+        switch (lhs, rhs) {
+        case (.addRally, .addRally):
+            return true
+        default:
+            return true
+        }
+    }
+    
+    nonisolated func hash(into hasher: inout Hasher) {
+        switch self {
+        case .addRally:
+            hasher.combine("addRally")
+        default:
+            hasher.combine("\(self)")
+        }
+    }
 }
 
 @Observable

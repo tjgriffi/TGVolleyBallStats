@@ -8,34 +8,23 @@
 import SwiftUI
 
 struct SetView: View {
-    var setViewModel: SetViewModel
-    var names = ["TJ", "Karen", "Mitchell", "Lem", "Ryan", "Megan"]
+    @State var setViewModel: SetViewModel
     
-    @State private var path = [NavigationRoute]()
+    @Environment(\.router) private var router
     
     var body: some View {
-        NavigationStack(path: $path) {
-            List {
-                ForEach(setViewModel.rallies) { rally in
-                    RallyView(rally: rally)
-                }
-                addRallyButton
+        List {
+            ForEach(setViewModel.rallies) { rally in
+                RallyView(rally: rally)
             }
-            .navigationTitle("Set 1")
-            .navigationDestination(for: NavigationRoute.self) { route in
-                
-                switch route {
-                case .addRally:
-                    AddRallyView(names: names)
-                }
-            }
+            addRallyButton
         }
     }
     
     private var addRallyButton: some View {
         Button(
             action: {
-                path.append(.addRally)
+                router.navigate(to: .addRally(setViewModel: $setViewModel))
             }, label: {
                 Text("Add Rally")
                     .font(.title)
@@ -74,12 +63,15 @@ struct RallyView: View {
 }
 
 struct AddRallyView: View {
-    @State var playerName: String = ""
+    @State var playerName: String
     @State var rotation: Int = 1
     @State var rallyStart: RallyStart = .receive
-    @State var stat: Stats = .ace
+    @State var pointGained: Int = 0
+    @State var stat: Stats = .none
     var names: [String]
     @State var playerAndStats: [PlayerAndStat] = []
+    @Binding var setViewModel: SetViewModel
+    @Environment(\.router) private var router
     
     var body: some View {
         List {
@@ -97,6 +89,12 @@ struct AddRallyView: View {
                 }
             }
             .pickerStyle(.menu)
+            Picker("Points Gained?", selection: $pointGained) {
+                Text("\(0)")
+                    .tag(0)
+                Text("\(1)")
+                    .tag(1)
+            }
             ForEach(playerAndStats, id: \.id) { playerAndStat in
                 HStack(alignment: .center) {
                     Spacer()
@@ -106,7 +104,8 @@ struct AddRallyView: View {
                     Spacer()
                 }
             }
-            Picker("Name", selection: $playerName) {
+            Spacer()
+            Picker("Player Name", selection: $playerName) {
                 ForEach(names, id: \.self) { name in
                     Text(name)
                         .tag(name)
@@ -121,9 +120,35 @@ struct AddRallyView: View {
             }
             .pickerStyle(.menu)
             Button("Add Another Stat") {
-                playerAndStats.append(PlayerAndStat(player: playerName, stat: stat))
+                if stat != .none {
+                    playerAndStats.append(PlayerAndStat(player: playerName, stat: stat))
+                    
+                    // Reset the appropriate values
+                    playerName = names.first ?? "Player name"
+                    stat = .none
+                } else {
+                    // MARK: Alert
+                }
             }
         }
+        Button  {
+            // MARK:  Store/Send up the saved Rally
+            // Store the Rotation, RallyStart and PlayerNameAndStat values into a rally object
+            let rally = Rally(
+                rotation: rotation,
+                rallyStart: rallyStart,
+                point: pointGained,
+                stats: playerAndStats)
+            
+            // Update the setViewModel's rallies
+            setViewModel.addRally(rally: rally)
+            
+            // Navigate backwards in the navigation stack
+            router.goBack()
+        } label: {
+            Text("DONE")
+        }
+
     }
 }
 
@@ -141,10 +166,6 @@ enum RallyStart: String, CaseIterable, Identifiable {
             return .red
         }
     }
-}
-
-enum NavigationRoute: Hashable {
-    case addRally
 }
 
 struct PlayerAndStat: Identifiable {

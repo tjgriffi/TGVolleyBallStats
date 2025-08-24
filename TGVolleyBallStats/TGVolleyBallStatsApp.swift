@@ -9,7 +9,8 @@ import SwiftUI
 
 @main
 struct TGVolleyBallStatsApp: App {
-    
+    @State private var router = Router()
+    var names = ["TJ", "Karen", "Mitchell", "Lem", "Ryan", "Megan"]
     var rallies: [Rally] = [
         Rally(
             rotation: 0,
@@ -30,11 +31,23 @@ struct TGVolleyBallStatsApp: App {
     ]
     var body: some Scene {
         WindowGroup {
-            SetView(
-                setViewModel: SetViewModel(
-                    rallies: rallies
+            NavigationStack(path: $router.navigationPath) {
+                SetView(
+                    setViewModel: SetViewModel(
+                        rallies: rallies
+                    )
                 )
-            )
+                .navigationTitle("Set")
+                .navigationDestination(for: Route.self) { route in
+                    switch route {
+                    case .addRally(let setViewModel):
+                        AddRallyView(playerName: names.first ?? "Player Name", names: names, setViewModel: setViewModel)
+                    default:
+                        Circle()
+                    }
+                }
+            }
+            .environment(\.router, router)
         }
     }
 }

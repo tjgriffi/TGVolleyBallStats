@@ -23,4 +23,7 @@ class SetViewModel {
         self.rallies = rallies
     }
     
+    func addRally(rally: Rally) {
+        rallies.append(rally)
+    }
 }
