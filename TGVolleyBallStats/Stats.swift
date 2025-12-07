@@ -43,6 +43,16 @@ enum Stats: String, CaseIterable, Identifiable {
     
     var id: String { rawValue }
     
+    static var examples: [Stats] {
+        var stats = [Stats]()
+        
+        for _ in 1...50 {
+            stats.append(Stats.allCases.randomElement() ?? .ace)
+        }
+        
+        return stats
+    }
+    
     /// Determines if a stat is offensive or defensive
     /// - Returns: bool with the result of if the stat is offensive or defensive
     func isOffensive() -> Bool {
