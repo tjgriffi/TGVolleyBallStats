@@ -15,7 +15,7 @@ struct Rally: Identifiable {
     let stats: [PlayerAndStat]
 }
 
-class SetDetailViewModel: ObservableObject {
+class SetViewModel: ObservableObject {
     
     @Published private(set) var rallies: [Rally]
     

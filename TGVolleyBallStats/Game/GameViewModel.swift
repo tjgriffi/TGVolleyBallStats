@@ -16,11 +16,16 @@ class VolleyBallSet: Identifiable {
     }
 }
 
-class GameViewModel: ObservableObject {
+@Observable class GameViewModel {
     
     private(set) var playerNames: [String]
     @Published private(set) var sets: [VolleyBallSet]
     private(set) var gameName: String
+    
+//    static var preview: GameViewModel {
+//        
+//        return GameViewModel(playerNames: <#T##[String]#>, sets: <#T##[VolleyBallSet]#>, gameName: "Preview")
+//    }
     
     init(playerNames: [String],
          sets: [VolleyBallSet],
@@ -32,5 +37,23 @@ class GameViewModel: ObservableObject {
     
     func addSet(set: VolleyBallSet) {
         sets.append(set)
+    }
+    
+    func getSetScores(for set: VolleyBallSet) -> RallyFinalScore {
+        
+        var homeScore = 0
+        var awayScore = 0
+        
+        set.rallies.forEach { rally in
+            if rally.point == 0 {
+                awayScore += 1
+            } else {
+                homeScore += 1
+            }
+        }
+        
+        let rallyFinalScore = RallyFinalScore(home: homeScore,away: awayScore)
+        
+        return rallyFinalScore
     }
 }

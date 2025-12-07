@@ -10,7 +10,8 @@ import SwiftUI
 
 enum Route: Hashable {
     case addRally(onCompeletion: (Rally) -> Void)
-    case setDetailView(rallies: [Rally])
+//    case setDetailView(rallies: [Rally])
+    case setDetailView(SetViewModel)
     case addSet
     case gameScreen
     

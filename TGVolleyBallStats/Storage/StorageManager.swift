@@ -1,18 +1,17 @@
 //
-//  TGVolleyBallStatsApp.swift
+//  StorageManager.swift
 //  TGVolleyBallStats
 //
-//  Created by Terrance Griffith on 8/13/25.
+//  Created by Terrance Griffith on 11/28/25.
 //
 
-import SwiftUI
+import Foundation
+import CoreData
 
-@main
-struct TGVolleyBallStatsApp: App {
-    @State private var router = Router()
-    let names = ["TJ", "Karen", "Mitchell", "Lem", "Ryan", "Megan"]
+// Keeps track of the data utilized by the different objects
+class StorageManager {
     
-    let set1 = VolleyBallSet(rallies: [
+    let set1Examples = VolleyBallSet(rallies: [
         Rally(
             rotation: 0,
             rallyStart: .serve,
@@ -276,7 +275,7 @@ struct TGVolleyBallStatsApp: App {
             stats: [PlayerAndStat(player: "Lem", stat: .ace)]
         )
     ])
-    let set2 = VolleyBallSet(rallies: [
+    let set2Examples = VolleyBallSet(rallies: [
         Rally(
             rotation: 0,
             rallyStart: .serve,
@@ -344,7 +343,7 @@ struct TGVolleyBallStatsApp: App {
             stats: [PlayerAndStat(player: "Lem", stat: .ace)]
         )
     ])
-    let set3 = VolleyBallSet(rallies: [
+    let set3Examples = VolleyBallSet(rallies: [
         Rally(
             rotation: 0,
             rallyStart: .serve,
@@ -352,27 +351,5 @@ struct TGVolleyBallStatsApp: App {
             stats: [PlayerAndStat(player: "Lem", stat: .ace)]
         )
     ])
-    
-    var body: some Scene {
-        WindowGroup {
-            NavigationStack(path: $router.navigationPath) {
-                GameView(gameViewModel: GameViewModel(
-                    playerNames: names, sets: [set1, set2, set3], gameName: "AirplaneModeIVL"))
-                .navigationDestination(for: Route.self) { route in
-                    switch route {
-                    case .addRally(let onCompletion):
-                        RallyView(playerName: names.first ?? "Player Name", names: names, onCompletion: onCompletion)
-                    case .setDetailView(let setViewModel):
-                        SetView(setViewModel: SetViewModel(rallies: setViewModel.rallies))
-                    case .addSet:
-                        // Create a setdetailView with an empty setDetailViewModel
-                        SetView(setViewModel: SetViewModel(rallies: []))
-                    default:
-                        Circle()
-                    }
-                }
-            }
-            .environment(\.router, router)
-        }
-    }
+    let playerExamples = ["TJ", "Karen", "Mitchell", "Lem", "Ryan", "Megan"]
 }
