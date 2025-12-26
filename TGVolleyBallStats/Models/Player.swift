@@ -13,19 +13,25 @@ class Player: Identifiable {
     
     static var example: Player {
         let player = Player(name: "Player 1")
-        for _ in 1...10 {
-            player.addNewGameStats(stats: Stats.examples)
+        let calendar = Calendar.current
+        for index in 1...10 {
+            player.addNewGameStats(stats: Stats.examples, date: calendar.date(byAdding: .day, value: index, to: Date()) ?? Date())
         }
+        player.last10GameStats = player.last10GameStats.sorted { $0.date < $1.date }
         return player
     }
     
+    
+    // An array of 6 players with 10 games each
     static var examples: [Player] {
         var players = [Player]()
         for num in 1...6 {
             let player = Player(name: "Player \(num)")
-            for _ in 1...10 {
-                player.addNewGameStats(stats: Stats.examples)
+            let calendar = Calendar.current
+            for index in 1...10 {
+                player.addNewGameStats(stats: Stats.examples, date: calendar.date(byAdding: .weekOfYear, value: index, to: Date()) ?? Date())
             }
+            player.last10GameStats = player.last10GameStats.sorted { $0.date > $1.date }
             players.append(player)
         }
         
@@ -37,19 +43,10 @@ class Player: Identifiable {
     }
     
     // TODO: Determine how to grab these from CoreData, but for now just initialize them as empty
-    private(set) var killPercentage: Double = 0
-    private(set) var killPercentageLast10Games: [Double] = []
-    private(set) var passRating: Double = 0
-    private(set) var passRatingLast10Games: [Double] = []
-    private(set) var freeBallRating: Double = 0
-    private(set) var freeBallRatingLast10Games: [Double] = []
-    private(set) var digRating: Double = 0
-    private(set) var digRatingLast10Games: [Double] = []
-    private(set) var pointScore: Int = 0
-    private(set) var pointScoreLast10Games: [Int] = []
+    private(set) var last10GameStats: [PlayerDateStats] = []
     
     // Update the player's stats with the latest stats from a game
-    func addNewGameStats(stats: [Stats]) {
+    func addNewGameStats(stats: [Stats], date: Date) {
         
         var kills: Double = 0
         var hitAttempts: Double = 0
@@ -90,35 +87,38 @@ class Player: Identifiable {
         }
         
         // Update the player stats
-        killPercentage = kills/hitAttempts
-        killPercentageLast10Games.append(killPercentage)
-        if killPercentageLast10Games.count > 10 {
-            killPercentageLast10Games.removeFirst()
-        }
+        let killPercentage = kills/hitAttempts
         
-        passRating = passes/passAttempts
-        passRatingLast10Games.append(passRating)
-        if passRatingLast10Games.count > 10 {
-            passRatingLast10Games.removeFirst()
-        }
+        let passRating = passes/passAttempts
+
+        let freeBallRating = freeball/freeballReceives
+
+        let digRating = digs/digAttempts
+
+        let pointScore = pointsScored
+
+        let playerDateStat = PlayerDateStats(
+            date: date,
+            killPercentage: killPercentage,
+            passRating: passRating,
+            freeBallRating: freeBallRating,
+            digRating: digRating,
+            pointScore: pointScore)
         
-        freeBallRating = freeball/freeballReceives
-        freeBallRatingLast10Games.append(freeBallRating)
-        if freeBallRatingLast10Games.count > 10 {
-            freeBallRatingLast10Games.removeFirst()
+        last10GameStats.append(playerDateStat)
+        if last10GameStats.count > 10 {
+            last10GameStats.removeFirst()
         }
-        
-        digRating = digs/digAttempts
-        digRatingLast10Games.append(digRating)
-        if digRatingLast10Games.count > 10 {
-            digRatingLast10Games.removeFirst()
-        }
-        
-        pointScore = pointsScored
-        pointScoreLast10Games.append(pointScore)
-        if pointScoreLast10Games.count > 10 {
-            pointScoreLast10Games.removeFirst()
-        }
-        
     }
+}
+
+struct PlayerDateStats: Identifiable {
+    var id: Date { return date }
+    
+    let date: Date
+    let killPercentage: Double
+    let passRating: Double
+    let freeBallRating: Double
+    let digRating: Double
+    let pointScore: Int
 }

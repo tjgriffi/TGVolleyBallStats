@@ -19,35 +19,181 @@ import Foundation
         PlayerDetailsViewModel(player: Player.example)
     }
     
-    var killPercentage: String? {
-        generatePercentage(player.killPercentage)
+    var killPercentage: Double? {
+        player.last10GameStats.last?.killPercentage
     }
     
-    var passRatingPercentage: String? {
-        generatePercentage(player.passRating)
+    var passRatingPercentage: Double? {
+        player.last10GameStats.last?.passRating
     }
     
-    var digRatingPercentage: String? {
-        generatePercentage(player.digRating)
+    var digRatingPercentage: Double? {
+        player.last10GameStats.last?.digRating
     }
     
-    var freeballRatingPercentage: String? {
-        generatePercentage(player.freeBallRating)
+    var freeballRatingPercentage: Double? {
+        player.last10GameStats.last?.freeBallRating
     }
     
-    var pointsScored: String {
-        String(player.pointScore)
-    }
-    
-    func generatePercentage(_ value: Double) -> String? {
-        let numberFormatter = NumberFormatter()
-        numberFormatter.numberStyle = .percent
-        
-        guard let formattedPercentage = numberFormatter.string(from: NSNumber(value: value)) else {
+    var pointsScored: Int? {
+        guard let pointsScored = player.last10GameStats.last?.pointScore else {
             return nil
         }
         
-        return formattedPercentage
+        return pointsScored
     }
     
+    var last10Games: [PlayerDateStats] {
+        
+        return player.last10GameStats
+    }
+    
+    /***
+     In order to the find a trend line:
+     1. Sum up the number of points (x)
+     2. Sum up stats given (y)
+     3. Sum the product of the points and stats (xy)
+     4. Sum the squared value of the points (x^2)
+     5. Get the numerator - the ( number of points (n) * the sum of the product of the points and stats (xy)) - ( Sum up the number of points (x) * Sum up stats given (y) )
+     6.  Get the denominator - (number of points (n) * sum of the squared value of the points (x^2) ) - ( Sum up the number of points (x) * Sum up stats given (y))
+     */
+    func generateTrendLine(stats: [Double]) -> TrendLine? {
+        let n = Double(stats.count)
+        let sumY = stats.reduce(0.0) { $0 + $1 }
+        let sumX = (0..<Int(n)).reduce(0.0) { $0 + Double($1)}
+        var sumXY = 0.0
+        
+        for (index, statValue) in stats.enumerated() {
+            sumXY = sumXY + (Double(index) * statValue)
+        }
+        
+        var sumX2 = 0.0
+        for index in 0..<stats.count {
+            sumX2 += Double(index * index)
+        }
+        
+        let numerator = (n * sumXY) - (sumX * sumY)
+        let denominator = (n * sumX2) - (sumX * sumX)
+        
+        guard denominator != 0 else {
+            return nil
+        }
+        
+        let slope = numerator / denominator
+        
+        let intercept = ( sumY - (slope * sumX) ) / n
+        
+        let trendLine = TrendLine(slope: slope, intercept: intercept, rSquared: 0.0)
+        
+        // Get the r2
+        let yAvg = sumY / n
+        let ssTotal = stats.reduce(0) { $0 + pow($1 - yAvg, 2) }
+        var ssRes = 0.0
+        
+        stats.enumerated().forEach({
+            ssRes += pow($0.element - trendLine.generatePointFor(Double($0.offset)), 2)
+        })
+            
+        let rSquared = ssTotal != 0 ? 1 - (ssRes / ssTotal) : 1
+        
+        print("Stats: \(stats)")
+        
+        return TrendLine(slope: slope, intercept: intercept, rSquared: rSquared)
+    }
+    
+    func getImprovementFromLastGame(stat: Stats) -> Double? {
+        
+        guard last10Games.count > 0 else {
+            return nil
+        }
+        
+        var percentage = 0.0
+        guard last10Games.count > 1 else {
+            // We only use one value
+            switch stat {
+            case .kill:
+                percentage = last10Games[0].killPercentage
+            case .pass0:
+                percentage = last10Games[0].passRating
+            case .freeBall:
+                percentage = last10Games[0].freeBallRating
+            case .dig0:
+                percentage = last10Games[0].digRating
+            default:
+                percentage = Double(last10Games[0].pointScore)
+            }
+            
+            return percentage
+        }
+        
+        let index = last10Games.count - 1
+        switch stat {
+        case .kill:
+            percentage = last10Games[index].killPercentage / last10Games[index-1].killPercentage - 1
+        case .pass0:
+            percentage = last10Games[index].passRating / last10Games[index-1].passRating - 1
+        case .freeBall:
+            percentage = last10Games[index].freeBallRating / last10Games[index-1].freeBallRating - 1
+        case .dig0:
+            percentage = last10Games[index].digRating / last10Games[index-1].digRating - 1
+        default:
+            percentage = Double(last10Games[index].pointScore) / Double(last10Games[index-1].pointScore) - 1
+        }
+        
+        return percentage
+    }
+    
+    func getAListOfStat(_ stat: ChartPlayerStats) -> [Double] {
+        
+        switch stat {
+        case .kill:
+            return last10Games.map { $0.killPercentage }//.reversed()
+        case .pass:
+            return last10Games.map { $0.passRating }//.reversed()
+        case .dig:
+            return last10Games.map { $0.digRating }//.reversed()
+        case .freeball:
+            return last10Games.map { $0.freeBallRating }//.reversed()
+        case .points:
+            return last10Games.map { Double($0.pointScore) }//.reversed()
+        }
+    }
+    
+    func generateAListOfTrendPoints(trendline: TrendLine, stat: ChartPlayerStats) -> [(Int, Double)] {
+        var index = -1
+        let list = (0...last10Games.count).map {_ in
+            
+            index += 1
+            return (index, trendline.generatePointFor(Double(index)))
+        }
+        print("Trend points: \(list)")
+        return list
+//        return (0...last10Games.count).map {_ in
+//            
+//            index += 1
+//            return (index, trendline.generatePointFor(Double(index)))
+//        }
+    }
+    
+}
+
+struct TrendLine {
+    let slope: Double
+    let intercept: Double
+    let rSquared: Double
+    
+    func generatePointFor(_ value: Double) -> Double {
+        
+        return slope * value + intercept
+    }
+}
+
+enum ChartPlayerStats: String, Identifiable {
+    case kill
+    case pass
+    case dig
+    case freeball
+    case points
+    
+    var id: String { return self.rawValue }
 }
