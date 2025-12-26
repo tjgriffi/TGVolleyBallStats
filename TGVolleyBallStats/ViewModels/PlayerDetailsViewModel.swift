@@ -147,32 +147,26 @@ import Foundation
         
         switch stat {
         case .kill:
-            return last10Games.map { $0.killPercentage }//.reversed()
+            return last10Games.map { $0.killPercentage }
         case .pass:
-            return last10Games.map { $0.passRating }//.reversed()
+            return last10Games.map { $0.passRating }
         case .dig:
-            return last10Games.map { $0.digRating }//.reversed()
+            return last10Games.map { $0.digRating }
         case .freeball:
-            return last10Games.map { $0.freeBallRating }//.reversed()
+            return last10Games.map { $0.freeBallRating }
         case .points:
-            return last10Games.map { Double($0.pointScore) }//.reversed()
+            return last10Games.map { Double($0.pointScore) }
         }
     }
     
     func generateAListOfTrendPoints(trendline: TrendLine, stat: ChartPlayerStats) -> [(Int, Double)] {
         var index = -1
-        let list = (0...last10Games.count).map {_ in
+
+        return (0..<last10Games.count).map {_ in
             
             index += 1
             return (index, trendline.generatePointFor(Double(index)))
         }
-        print("Trend points: \(list)")
-        return list
-//        return (0...last10Games.count).map {_ in
-//            
-//            index += 1
-//            return (index, trendline.generatePointFor(Double(index)))
-//        }
     }
     
 }
