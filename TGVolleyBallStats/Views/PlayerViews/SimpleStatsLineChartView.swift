@@ -32,45 +32,18 @@ struct SimpleStatsLineChartView: View {
         VStack {
             SimpleStatsChartHeaderView(focusedStat: focusedStat, playerDetailsViewModel: playerDetailsViewModel)
                 .aspectRatio(1, contentMode: .fit)
-            VStack {
-                Chart(playerDetailsViewModel.last10Games) { game in
-                    LineMark(x: .value("dates", game.date), y: .value("kill percentage", game.killPercentage))
-                        .foregroundStyle(by: .value("Stats", "Stats"))
-                }
-                .chartLegend(.hidden)
-                .aspectRatio(1, contentMode: .fit)
-                
-                if let trendLine = playerDetailsViewModel.generateTrendLine(stats: playerDetailsViewModel.getAListOfStat(focusedStat)) {
-                    let indexAndPoints = playerDetailsViewModel.generateAListOfTrendPoints(trendline: trendLine, stat: focusedStat)
-                    Text("There appears to be a ")
-                    if trendLine.slope > 0 {
-                        Text("positve ")
-                            .bold()
-                            .foregroundStyle(.blue)
-                    } else if trendLine.slope < 0 {
-                        Text("negative ")
-                            .bold()
-                            .foregroundStyle(.red)
-                    } else {
-                        Text("stable ")
-                            .bold()
-                    }
-                    Text("trend with your recent games")
-                    Chart(indexAndPoints, id: \.0) { value in
-                        
-                        LineMark(x: .value("index", value.0), y: .value("trend points", value.1))
-                            .foregroundStyle(by: .value("Trendline", "Trendline"))
-                    }
-//                    .chartXAxis(.hidden)
-//                    .chartYAxis(.hidden)
-//                    .chartLegend(.hidden)
-                    .chartForegroundStyleScale(["Trendline": .purple, "Stats": .blue])
-                    .chartYScale(domain: [0,1.0])
-                    .aspectRatio(1, contentMode: .fit)
-                }
+            
+            Chart(playerDetailsViewModel.last10GamesWithStats) { game in
+                LineMark(x: .value("dates", game.date), y: .value("kill percentage", game.killPercentage.value))
+                    .foregroundStyle(by: .value("Stats", "Stats"))
+                LineMark(x: .value("dates", game.date), y: .value("trend point", game.killPercentage.trendPoint))
+                    .foregroundStyle(by: .value("Trendline", "Trendline"))
             }
+            .chartForegroundStyleScale(["Trendline": .purple , "Stats": .blue])
+            .aspectRatio(1, contentMode: .fit)
         }
     }
+    
     func generatePercentage(_ value: Double?) -> String? {
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .percent
