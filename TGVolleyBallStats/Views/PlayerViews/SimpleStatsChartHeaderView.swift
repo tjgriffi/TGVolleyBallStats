@@ -27,16 +27,20 @@ struct SimpleStatsChartHeaderView: View {
     }
     
     var body: some View {
-        HStack {
-            if let improvement = playerDetailsViewModel.getImprovementFromLastGame(stat: .kill) {
-                Image(systemName: improvement > 0 ? "arrow.up.right" : "arrow.down.right")
-                    .foregroundStyle(improvement > 0 ? .blue : .red)
-                    .bold()
-                Text("Your ") +
-                Text(focusedText) +
-                Text(" has ")
-                improvementView(improvement: improvement)
-                Text("since this last game")
+        if let improvement = playerDetailsViewModel.getImprovementFromLastGame(stat: .kill) {
+            VStack {
+                HStack {
+                    Image(systemName: improvement > 0 ? "arrow.up.right" : "arrow.down.right")
+                        .foregroundStyle(improvement > 0 ? .blue : .red)
+                        .bold()
+                    Text("Your ") +
+                    Text(focusedText) +
+                    Text(" has ")
+                }
+                HStack {
+                    improvementView(improvement: improvement)
+                    Text("since this last game")
+                }
             }
         }
     }
