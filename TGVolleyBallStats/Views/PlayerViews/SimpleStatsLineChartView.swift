@@ -12,6 +12,8 @@ struct SimpleStatsLineChartView: View {
     var focusedStat: ChartPlayerStats
     var playerDetailsViewModel: PlayerDetailsViewModel
     
+    let linearGradient = LinearGradient(colors: [Color.blue.opacity(0.7), Color.blue.opacity(0.3)], startPoint: .top, endPoint: .bottom)
+    
     var focusedText: String {
         switch focusedStat {
         case .kill:
@@ -31,32 +33,19 @@ struct SimpleStatsLineChartView: View {
         // HeaderView
         VStack {
             SimpleStatsChartHeaderView(focusedStat: focusedStat, playerDetailsViewModel: playerDetailsViewModel)
-                .aspectRatio(1, contentMode: .fit)
-            
-            Chart(playerDetailsViewModel.last10GamesWithStats) { game in
-                LineMark(x: .value("dates", game.date), y: .value("kill percentage", game.killPercentage.value))
-                    .foregroundStyle(by: .value("Stats", "Stats"))
-                LineMark(x: .value("dates", game.date), y: .value("trend point", game.killPercentage.trendPoint))
-                    .foregroundStyle(by: .value("Trendline", "Trendline"))
+
+            Chart(playerDetailsViewModel.getAListOfStat(focusedStat), id: \.date) { game in
+                AreaMark(x: .value("dates", game.date), y: .value("stat percentage", game.stat))
+                    .foregroundStyle(linearGradient)
             }
-            .chartForegroundStyleScale(["Trendline": .purple , "Stats": .blue])
-            .aspectRatio(1, contentMode: .fit)
+            .frame(height: 70)
+            .chartXAxis(.hidden)
+            .chartYAxis(.hidden)
         }
-    }
-    
-    func generatePercentage(_ value: Double?) -> String? {
-        let numberFormatter = NumberFormatter()
-        numberFormatter.numberStyle = .percent
-        
-        guard let value = value, let formattedPercentage = numberFormatter.string(from: NSNumber(value: value)) else {
-            return nil
-        }
-        
-        return formattedPercentage
     }
 }
 
 #Preview {
-    SimpleStatsLineChartView(focusedStat: .kill, playerDetailsViewModel: .preview)
-        .padding()
+    SimpleStatsLineChartView(focusedStat: .dig, playerDetailsViewModel: .preview)
+            .padding()
 }

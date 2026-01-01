@@ -13,52 +13,6 @@ import Foundation
     
     init(player: Player) {
         self.player = player
-        
-        initialSetup()
-    }
-    
-    func initialSetup() {
-        
-        var chartStatDoubleDict: [ChartPlayerStats: [Double]] = [:]
-        
-        // Get the list of trendpoints needed for the user
-        for stat in ChartPlayerStats.allCases {
-            var stats: [Double]
-            
-            switch stat{
-            case .dig:
-                stats = last10Games.map { $0.digRating }
-            case .freeball:
-                stats = last10Games.map { $0.freeBallRating }
-            case .kill:
-                stats = last10Games.map { $0.killPercentage }
-            case .pass:
-                stats = last10Games.map { $0.passRating }
-            case .points:
-                stats = last10Games.map { Double($0.pointScore) }
-            }
-            
-            if let trendLine = generateTrendLine(stats: stats) {
-                chartStatDoubleDict[stat, default: []] = generateAListOfTrendPoints(trendline: trendLine, stat: stat)
-            }
-        }
-        
-        // Create the list of 10 games with the appropriate trend point attached
-        var index = 0
-        last10Games.forEach { game in
-            
-            // TODO:  Need to comeback and clean this up with proper error handling
-            let playerWithStatAndTrend = PlayerDateStatTrendPoint(
-                date: game.date,
-                killPercentage: (value: game.killPercentage, trendPoint: chartStatDoubleDict[.kill]![index]),
-                passRating: (value: game.passRating, trendPoint: chartStatDoubleDict[.pass]![index]),
-                freeBallRating: (value: game.freeBallRating, trendPoint: chartStatDoubleDict[.freeball]![index]),
-                digRating: (value: game.digRating, trendPoint: chartStatDoubleDict[.dig]![0]),
-                pointScore: (value: Double(game.pointScore), trendPoint: chartStatDoubleDict[.points]![index])
-            )
-            index += 1
-            last10GamesWithStats.append(playerWithStatAndTrend)
-        }
     }
     
     static var preview: PlayerDetailsViewModel {
@@ -93,8 +47,6 @@ import Foundation
         
         return player.last10GameStats
     }
-    
-    var last10GamesWithStats: [PlayerDateStatTrendPoint] = []
     
     /***
      In order to the find a trend line:
@@ -147,7 +99,7 @@ import Foundation
         return TrendLine(slope: slope, intercept: intercept, rSquared: rSquared)
     }
     
-    func getImprovementFromLastGame(stat: Stats) -> Double? {
+    func getImprovementFromLastGame(stat: ChartPlayerStats) -> Double? {
         
         guard last10Games.count > 0 else {
             return nil
@@ -159,13 +111,13 @@ import Foundation
             switch stat {
             case .kill:
                 percentage = last10Games[0].killPercentage
-            case .pass0:
+            case .pass:
                 percentage = last10Games[0].passRating
-            case .freeBall:
+            case .freeball:
                 percentage = last10Games[0].freeBallRating
-            case .dig0:
+            case .dig:
                 percentage = last10Games[0].digRating
-            default:
+            case .points:
                 percentage = Double(last10Games[0].pointScore)
             }
             
@@ -176,33 +128,49 @@ import Foundation
         switch stat {
         case .kill:
             percentage = last10Games[index].killPercentage / last10Games[index-1].killPercentage - 1
-        case .pass0:
+        case .pass:
             percentage = last10Games[index].passRating / last10Games[index-1].passRating - 1
-        case .freeBall:
+        case .freeball:
             percentage = last10Games[index].freeBallRating / last10Games[index-1].freeBallRating - 1
-        case .dig0:
+        case .dig:
             percentage = last10Games[index].digRating / last10Games[index-1].digRating - 1
-        default:
+        case .points:
             percentage = Double(last10Games[index].pointScore) / Double(last10Games[index-1].pointScore) - 1
         }
         
         return percentage
     }
     
-    func getAListOfStat(_ stat: ChartPlayerStats) -> [Double] {
+    func getAListOfStat(_ stat: ChartPlayerStats) -> [GameDateStatTrendPoint] {
+        
+        var stats: [Double]
+        var chartStatDoubleDict: [ChartPlayerStats: [Double]] = [:]
         
         switch stat {
         case .kill:
-            return last10Games.map { $0.killPercentage }
+            stats = last10Games.map { $0.killPercentage }
         case .pass:
-            return last10Games.map { $0.passRating }
+            stats = last10Games.map { $0.passRating }
         case .dig:
-            return last10Games.map { $0.digRating }
+            stats = last10Games.map { $0.digRating }
         case .freeball:
-            return last10Games.map { $0.freeBallRating }
+            stats = last10Games.map { $0.freeBallRating }
         case .points:
-            return last10Games.map { Double($0.pointScore) }
+            stats = last10Games.map { Double($0.passRating) }
         }
+        
+        if let trendLine = generateTrendLine(stats: stats) {
+            chartStatDoubleDict[stat, default: []] = generateAListOfTrendPoints(trendline: trendLine, stat: stat)
+        }
+        
+        var index = 0
+        var listOfStats: [GameDateStatTrendPoint] = []
+        last10Games.forEach { game in
+            listOfStats.append(GameDateStatTrendPoint(date: game.date, stat: stats[index], trendPoint: chartStatDoubleDict[stat]![index]))
+            index += 1
+        }
+        
+        return listOfStats
     }
     
     func generateAListOfTrendPoints(trendline: TrendLine, stat: ChartPlayerStats) -> /*[(Int, Double)]*/[Double] {
@@ -213,6 +181,29 @@ import Foundation
             index += 1
             return trendline.generatePointFor(Double(index))
         }
+    }
+    
+    ///   Generate the trendline for the given user stat
+    /// - Parameter stat: The ChartPlayerStats we want to get a line for
+    /// - Returns: A TrendLine struct
+    func getTrendlineForStat(stat: ChartPlayerStats) -> TrendLine? {
+        
+        var stats: [Double]
+            
+        switch stat {
+        case .dig:
+            stats = last10Games.map { $0.digRating }
+        case .freeball:
+            stats = last10Games.map { $0.freeBallRating }
+        case .kill:
+            stats = last10Games.map { $0.killPercentage }
+        case .pass:
+            stats = last10Games.map { $0.passRating }
+        case .points:
+            stats = last10Games.map { Double($0.pointScore) }
+        }
+        
+        return generateTrendLine(stats: stats)
     }
     
 }
@@ -236,15 +227,29 @@ enum ChartPlayerStats: String, Identifiable, CaseIterable {
     case points
     
     var id: String { return self.rawValue }
+    
+    func termForPlayerDetailsGrid() -> String {
+        switch self {
+        case .kill:
+            "Kill percentage"
+        case .pass:
+            "Pass percentage"
+        case .dig:
+            "Dig ratio"
+        case .freeball:
+            "Freeball Ratio"
+        case .points:
+            "Points"
+        }
+    }
 }
 
-struct PlayerDateStatTrendPoint: Identifiable {
+/// Generic data point used by the charts in Player views
+struct GameDateStatTrendPoint: Identifiable {
+    
     var id: Date { return date }
     
     let date: Date
-    let killPercentage: (value: Double, trendPoint: Double)
-    let passRating: (value: Double, trendPoint: Double)
-    let freeBallRating: (value: Double, trendPoint: Double)
-    let digRating: (value: Double, trendPoint: Double)
-    let pointScore: (value: Double, trendPoint: Double)
+    let stat: Double
+    let trendPoint: Double
 }

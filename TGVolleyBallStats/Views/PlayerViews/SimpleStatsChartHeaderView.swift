@@ -27,7 +27,7 @@ struct SimpleStatsChartHeaderView: View {
     }
     
     var body: some View {
-        if let improvement = playerDetailsViewModel.getImprovementFromLastGame(stat: .kill) {
+        if let improvement = playerDetailsViewModel.getImprovementFromLastGame(stat: focusedStat) {
             VStack {
                 HStack {
                     Image(systemName: improvement > 0 ? "arrow.up.right" : "arrow.down.right")
@@ -50,23 +50,25 @@ struct SimpleStatsChartHeaderView: View {
         let improvement: Double
         
         var body: some View {
-            if improvement > 0 {
-                Text("improved ")
-                    .bold()
-                + Text("by ")
-                + Text(generatePercentage(improvement)!)
-                    .foregroundStyle(.blue)
-                    .bold()
-            } else if improvement < 0 {
-                Text("decreased ")
-                    .bold()
-                + Text("by ")
-                + Text(generatePercentage(improvement)!)
-                    .foregroundStyle(.red)
-                    .bold()
-            } else {
-                Text("not changed ")
-                    .bold()
+            HStack {
+                if improvement > 0 {
+                    Text("improved ")
+                        .bold()
+                    + Text("by ")
+                    + Text(generatePercentage(improvement)!)
+                        .foregroundStyle(.blue)
+                        .bold()
+                } else if improvement < 0 {
+                    Text("decreased ")
+                        .bold()
+                    + Text("by ")
+                    + Text(generatePercentage(improvement)!)
+                        .foregroundStyle(.red)
+                        .bold()
+                } else {
+                    Text("not changed ")
+                        .bold()
+                }
             }
         }
         
@@ -85,13 +87,5 @@ struct SimpleStatsChartHeaderView: View {
 
 #Preview {
     SimpleStatsChartHeaderView(focusedStat: .kill, playerDetailsViewModel: .preview)
-        .padding()
-    SimpleStatsChartHeaderView(focusedStat: .pass, playerDetailsViewModel: .preview)
-        .padding()
-    SimpleStatsChartHeaderView(focusedStat: .freeball, playerDetailsViewModel: .preview)
-        .padding()
-    SimpleStatsChartHeaderView(focusedStat: .dig, playerDetailsViewModel: .preview)
-        .padding()
-    SimpleStatsChartHeaderView(focusedStat: .points, playerDetailsViewModel: .preview)
         .padding()
 }
