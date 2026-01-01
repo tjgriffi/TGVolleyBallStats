@@ -357,7 +357,7 @@ struct TGVolleyBallStatsApp: App {
         WindowGroup {
             NavigationStack(path: $router.navigationPath) {
                 GameView(gameViewModel: GameViewModel(
-                    playerNames: names, sets: [set1, set2, set3], gameName: "AirplaneModeIVL"))
+                    players: Player.examples, sets: [set1, set2, set3], gameName: "AirplaneModeIVL"))
                 .navigationDestination(for: Route.self) { route in
                     switch route {
                     case .addRally(let onCompletion):

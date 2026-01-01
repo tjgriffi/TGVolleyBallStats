@@ -14,29 +14,15 @@ struct GameView: View {
     var body: some View {
         Text(gameViewModel.gameName)
             .font(.title)
-//        ForEach(gameViewModel.sets.enumerated(), id: \.element.id) { index, set in
-//            
-//            let setColor = switch index {
-//            case 0:
-//                SetViewNumber.first
-//            case 1:
-//                SetViewNumber.second
-//            case 2:
-//                SetViewNumber.third
-//            case 3:
-//                SetViewNumber.fourth
-//            case 4:
-//                SetViewNumber.fifth
-//            default:
-//                SetViewNumber.first
-//            }
-//            
-//            GameSetView(setNumber: setColor, setViewModel: SetViewModel(rallies: set.rallies))
-//                .onTapGesture {
-//                    // Navigate to the detail view for the given set
-//                    router.navigate(to: .setDetailView(rallies: set.rallies))
-//                }
-//        }
+        NavigationStack {
+            ForEach(gameViewModel.sets) { volleyballSet in
+                
+                GameSetView(
+                    setNumber: SetViewNumber.first, finalScores: gameViewModel.getSetScores(for: volleyballSet)
+                )
+            }
+            .navigationTitle("Game Screen")
+        }
         // Create set button: Creates an empty set
         Button(
             action: {
@@ -108,5 +94,5 @@ struct RallyFinalScore {
 }
 
 #Preview {
-    GameView(gameViewModel: <#T##GameViewModel#>)
+    GameView(gameViewModel: .preview)
 }
