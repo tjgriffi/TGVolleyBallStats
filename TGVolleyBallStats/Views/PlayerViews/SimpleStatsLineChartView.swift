@@ -12,8 +12,6 @@ struct SimpleStatsLineChartView: View {
     var focusedStat: ChartPlayerStats
     var playerDetailsViewModel: PlayerDetailsViewModel
     
-    let linearGradient = LinearGradient(colors: [Color.blue.opacity(0.7), Color.blue.opacity(0.3)], startPoint: .top, endPoint: .bottom)
-    
     var focusedText: String {
         switch focusedStat {
         case .kill:
@@ -32,15 +30,22 @@ struct SimpleStatsLineChartView: View {
     var body: some View {
         // HeaderView
         VStack {
-            SimpleStatsChartHeaderView(focusedStat: focusedStat, playerDetailsViewModel: playerDetailsViewModel)
-
-            Chart(playerDetailsViewModel.getAListOfStat(focusedStat), id: \.date) { game in
-                AreaMark(x: .value("dates", game.date), y: .value("stat percentage", game.stat))
-                    .foregroundStyle(linearGradient)
+            if let improvement = playerDetailsViewModel.getImprovementFromLastGame(stat: focusedStat) {
+                
+                let linearGradient = LinearGradient(
+                    colors: improvement > 0 ?  [Color.blue.opacity(0.7), Color.blue.opacity(0.3)] : [Color.red.opacity(0.7), Color.red.opacity(0.3)],
+                    startPoint: .top,
+                    endPoint: .bottom)
+                SimpleStatsChartHeaderView(focusedStat: focusedStat, improvement: improvement)
+                
+                Chart(playerDetailsViewModel.getAListOfStat(focusedStat), id: \.date) { game in
+                    AreaMark(x: .value("dates", game.date), y: .value("stat percentage", game.stat))
+                        .foregroundStyle(linearGradient)
+                }
+                .frame(height: 70)
+                .chartXAxis(.hidden)
+                .chartYAxis(.hidden)
             }
-            .frame(height: 70)
-            .chartXAxis(.hidden)
-            .chartYAxis(.hidden)
         }
     }
 }

@@ -17,7 +17,11 @@ struct PlayerDetailsView: View {
             let listOfStats = playerDetailsViewModel.getAListOfStat(focusedStat)
             Group {
                 Section {
-                    SimpleStatsChartHeaderView(focusedStat: focusedStat, playerDetailsViewModel: playerDetailsViewModel)
+                    if let improvement = playerDetailsViewModel.getImprovementFromLastGame(stat: focusedStat) {
+                        SimpleStatsChartHeaderView(
+                            focusedStat: focusedStat,
+                            improvement: improvement)
+                    }
                     
                 }
                 Section {

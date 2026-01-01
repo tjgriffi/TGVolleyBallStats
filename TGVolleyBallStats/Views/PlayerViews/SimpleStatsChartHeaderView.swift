@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SimpleStatsChartHeaderView: View {
     var focusedStat: ChartPlayerStats
-    var playerDetailsViewModel: PlayerDetailsViewModel
+    var improvement: Double
     
     var focusedText: String {
         switch focusedStat {
@@ -27,20 +27,18 @@ struct SimpleStatsChartHeaderView: View {
     }
     
     var body: some View {
-        if let improvement = playerDetailsViewModel.getImprovementFromLastGame(stat: focusedStat) {
+        VStack {
+            HStack {
+                Image(systemName: improvement > 0 ? "arrow.up.right" : "arrow.down.right")
+                    .foregroundStyle(improvement > 0 ? .blue : .red)
+                    .bold()
+                Text("Your ") +
+                Text(focusedText) +
+                Text(" has ")
+            }
             VStack {
-                HStack {
-                    Image(systemName: improvement > 0 ? "arrow.up.right" : "arrow.down.right")
-                        .foregroundStyle(improvement > 0 ? .blue : .red)
-                        .bold()
-                    Text("Your ") +
-                    Text(focusedText) +
-                    Text(" has ")
-                }
-                HStack {
-                    improvementView(improvement: improvement)
-                    Text("since this last game")
-                }
+                improvementView(improvement: improvement)
+                Text("since this last game")
             }
         }
     }
@@ -86,6 +84,6 @@ struct SimpleStatsChartHeaderView: View {
 }
 
 #Preview {
-    SimpleStatsChartHeaderView(focusedStat: .kill, playerDetailsViewModel: .preview)
+    SimpleStatsChartHeaderView(focusedStat: .kill, improvement: PlayerDetailsViewModel.preview.getImprovementFromLastGame(stat: .kill) ?? 0.0)
         .padding()
 }
