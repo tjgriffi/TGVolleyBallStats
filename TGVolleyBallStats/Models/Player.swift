@@ -122,3 +122,33 @@ struct PlayerDateStats: Identifiable {
     let digRating: Double
     let pointScore: Int
 }
+
+struct PlayerAndStat: Identifiable {
+    let player: String
+    let stat: Stats
+    let id = UUID()
+    
+    static var example: PlayerAndStat {
+        PlayerAndStat(player: "TJ", stat: Stats.allCases.randomElement() ?? .ace)
+    }
+    
+    static var examples: [PlayerAndStat] {
+        let player = "TJ"
+                
+        return (0...4).map {_ in PlayerAndStat(player: player, stat: Stats.allCases.randomElement() ?? .ace) }
+    }
+    
+    static func generateExamples(with name: String) -> [PlayerAndStat] {
+        
+        return (0...4).map {_ in PlayerAndStat(player: name, stat: Stats.allCases.randomElement() ?? .ace) }
+    }
+}
+
+import Playgrounds
+
+#Playground {
+    let playerAndStat = PlayerAndStat.example
+    
+    let playersRallyStats = PlayerAndStat.examples
+    let customPlayerRallyStats = PlayerAndStat.generateExamples(with: "Ryan")
+}

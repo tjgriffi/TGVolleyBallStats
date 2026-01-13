@@ -16,7 +16,8 @@ struct SetView: View {
             .font(.title2)
         List {
             ForEach(setViewModel.rallies) { rally in
-                RallyView(rally: rally)
+                // TODO: Uncomment when ready to test the file
+//                RallyView(rally: rally)
             }
             addRallyButton
         }

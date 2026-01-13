@@ -7,14 +7,6 @@
 
 import Foundation
 
-struct Rally: Identifiable {
-    var id = UUID()
-    let rotation: Int
-    let rallyStart: RallyStart
-    let point: Int
-    let stats: [PlayerAndStat]
-}
-
 class SetViewModel: ObservableObject {
     
     @Published private(set) var rallies: [Rally]

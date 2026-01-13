@@ -25,7 +25,7 @@ struct PlayerDetailsView: View {
                     
                 }
                 Section {
-                    trendLineHeaderView(trendLine: playerDetailsViewModel.getTrendlineForStat(stat: focusedStat) ?? TrendLine(slope: 0.0, intercept: 0.0, rSquared: 0.0))
+                    trendLineHeaderView(trendLine: playerDetailsViewModel.getTrendlineForStat(stat: focusedStat) ?? TrendLine(slope: 0.0, intercept: 0.0))
                 }
                 PlayerDetailGraphView(listOfStats: listOfStats)
                 
