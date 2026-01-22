@@ -139,6 +139,11 @@ class GameViewModel {
     
     var game: Game
     var setValues: [SetValues] = []
+    var statsForCurrentRally: [PlayerAndStat] = []
+    var rallies: [Rally] = []
+    var sets: [Set] = []
+    var currentRotation: Int = 1
+    private var setCount = 1
     
     struct SetValues: Identifiable {
         let id: Int
@@ -167,15 +172,22 @@ class GameViewModel {
         self.game = game
         self.setValues = []
         
-        var setCount = 1
-        game.sets.forEach { set in
-            setValues.append(setupStats(for: set, setNumber: setCount))
-            setCount += 1
+        
+        game.sets.forEach { [weak self] set in
+            self?.setValues.append(self?.setupStats(for: set, setNumber: self?.setCount ?? 1) ?? SetValues.init(
+            id: 0, kills: 0, digs: 0, aces: 0, passes: 0, spikes: 0, freeBall: 0, killBlocks: 0, freeballKills: 0, touches: 0, blocks: 0, hittingErrors: 0, blockingErrors: 0, settingErrors: 0, freeBallErrors: 0, shanks: 0, serveErrors: 0, rallySore: .init(home: 0, away: 0), bestRotation: (0,0), worstRotation: (0,0)
+        )
+            )
+            self?.setCount += 1
         }
     }
     
     static var preview: GameViewModel {
         GameViewModel(game: .example)
+    }
+    
+    static var previewNoSets: GameViewModel {
+        GameViewModel(game: .noSets)
     }
     
     private func setupStats(for set: `Set`, setNumber: Int) -> SetValues {
@@ -325,6 +337,47 @@ class GameViewModel {
             bestRotation: bestRotation,
             worstRotation: worstRotation
         )
+    }
+    
+    /// Updates the list for the current rally's stats
+    /// - Parameter playerStat: The stat that has been tracked by the UI
+    func updateRally(_ playerStat: PlayerAndStat) {
+        statsForCurrentRally.append(playerStat)
+    }
+    
+    ///  Add the rally information to the list of rallies for the currently tracked set
+    /// - Parameters:
+    ///   - pointGained: Whether a point was gained or lost in this rally
+    ///   - rallyStart: Whether the team served or received
+    func nextRallyClicked(pointGained: Int, rallyStart: RallyStart) {
+        let rally = Rally(
+            rotation: currentRotation,
+            rallyStart: rallyStart,
+            point: pointGained,
+            stats: statsForCurrentRally
+        )
+        
+        rallies.append(rally)
+        statsForCurrentRally.removeAll()
+        
+        // Update values
+        currentRotation = (pointGained == 1 && rallyStart == .receive) ? currentRotation + 1 : currentRotation
+        
+        // Update rotation value if it's beyond 6
+        currentRotation = currentRotation > 6 ? 1 : currentRotation
+    }
+    
+    func doneCreatingSetClicked() {
+        // Add the set to the list of sets for our game object
+        let set = `Set`(players: game.players, rallies: rallies)
+        game.sets.append(set)
+        
+        setupStats(for: set, setNumber: setCount)
+        setCount += 1
+        
+        // Reset all of the other values
+        currentRotation = 1
+        rallies.removeAll()
     }
 }
 

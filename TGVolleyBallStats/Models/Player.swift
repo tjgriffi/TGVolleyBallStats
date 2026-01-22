@@ -7,7 +7,15 @@
 
 import Foundation
 
-class Player: Identifiable {
+class Player: Identifiable, Hashable {
+    static func == (lhs: Player, rhs: Player) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
     let id = UUID()
     let name: String
     

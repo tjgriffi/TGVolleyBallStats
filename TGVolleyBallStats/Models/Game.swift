@@ -10,8 +10,8 @@ import Foundation
 struct Game: Identifiable {
     var id: Date { return date }
     let date: Date
-    let players: [Player]
-    let sets: [`Set`]
+    var players: [Player]
+    var sets: [`Set`] = []
     
     static var example: Game {
         let players = Player.examples
@@ -22,8 +22,18 @@ struct Game: Identifiable {
             sets: (1...3).map { _ in `Set`.generateSet(withPlayers: players) }
         )
     }
+    
+    static var noSets: Game {
+        let players = Player.examples
+        
+        return Game(
+            date: Date(),
+            players: players
+        )
+    }
 }
 
+// TODO: Revisit if Set needs a list of players for production or if it's just needed for testing
 struct `Set`: Identifiable {
     let id = UUID()
     let players: [Player]
