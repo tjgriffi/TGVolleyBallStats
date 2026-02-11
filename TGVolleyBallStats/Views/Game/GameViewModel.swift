@@ -168,9 +168,11 @@ class GameViewModel {
         let worstRotation: (rotation: Int, pointsLost: Int)
     }
     
-    init(game: Game) {
+    // MARK: Rallies is for testing purposes
+    init(game: Game, rallies: [Rally] = []) {
         self.game = game
         self.setValues = []
+        self.rallies = rallies
         
         
         game.sets.forEach { [weak self] set in
@@ -188,6 +190,10 @@ class GameViewModel {
     
     static var previewNoSets: GameViewModel {
         GameViewModel(game: .noSets)
+    }
+    
+    static var previewNoSetsFullRally: GameViewModel {
+        GameViewModel(game: .noSets, rallies: Rally.examples)
     }
     
     private func setupStats(for set: `Set`, setNumber: Int) -> SetValues {
@@ -338,46 +344,32 @@ class GameViewModel {
             worstRotation: worstRotation
         )
     }
-    
-    /// Updates the list for the current rally's stats
-    /// - Parameter playerStat: The stat that has been tracked by the UI
-    func updateRally(_ playerStat: PlayerAndStat) {
-        statsForCurrentRally.append(playerStat)
-    }
-    
-    ///  Add the rally information to the list of rallies for the currently tracked set
-    /// - Parameters:
-    ///   - pointGained: Whether a point was gained or lost in this rally
-    ///   - rallyStart: Whether the team served or received
-    func nextRallyClicked(pointGained: Int, rallyStart: RallyStart) {
-        let rally = Rally(
-            rotation: currentRotation,
-            rallyStart: rallyStart,
-            point: pointGained,
-            stats: statsForCurrentRally
-        )
-        
-        rallies.append(rally)
-        statsForCurrentRally.removeAll()
-        
-        // Update values
-        currentRotation = (pointGained == 1 && rallyStart == .receive) ? currentRotation + 1 : currentRotation
-        
-        // Update rotation value if it's beyond 6
-        currentRotation = currentRotation > 6 ? 1 : currentRotation
-    }
-    
+
     func doneCreatingSetClicked() {
         // Add the set to the list of sets for our game object
         let set = `Set`(players: game.players, rallies: rallies)
         game.sets.append(set)
         
-        setupStats(for: set, setNumber: setCount)
+        self.setValues.append(setupStats(for: set, setNumber: setCount))
         setCount += 1
         
         // Reset all of the other values
         currentRotation = 1
         rallies.removeAll()
+    }
+        
+    func doneCreatingRally(entries: [PlayerAndStat], pointGained: Bool, rallyStart: RallyStart, rotation: Int) {
+        
+        // MARK: Add guards for making sure that the information is correct
+        // ex: 0 < rotation < 7, entries is not empty
+        let rally = Rally(
+            rotation: rotation,
+            rallyStart: rallyStart,
+            point: pointGained ? 1 : 0,
+            stats: entries
+        )
+        
+        rallies.append(rally)
     }
 }
 

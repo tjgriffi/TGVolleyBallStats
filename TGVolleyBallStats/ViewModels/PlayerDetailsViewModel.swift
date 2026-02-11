@@ -45,7 +45,7 @@ import Foundation
     
     var last10Games: [PlayerDateStats] {
         
-        return player.last10GameStats
+        return player.last10GameStats.reversed()
     }
     
     /***
@@ -83,7 +83,7 @@ import Foundation
         
         let intercept = ( sumY - (slope * sumX) ) / n
         
-        let trendLine = TrendLine(slope: slope, intercept: intercept, rSquared: 0.0)
+        let trendLine = TrendLine(slope: slope, intercept: intercept)
         
         // Get the r2
         let yAvg = sumY / n
@@ -96,7 +96,7 @@ import Foundation
             
         let rSquared = ssTotal != 0 ? 1 - (ssRes / ssTotal) : 1
                 
-        return TrendLine(slope: slope, intercept: intercept, rSquared: rSquared)
+        return TrendLine(slope: slope, intercept: intercept)
     }
     
     func getImprovementFromLastGame(stat: ChartPlayerStats) -> Double? {
@@ -211,7 +211,6 @@ import Foundation
 struct TrendLine {
     let slope: Double
     let intercept: Double
-    let rSquared: Double
     
     func generatePointFor(_ value: Double) -> Double {
         

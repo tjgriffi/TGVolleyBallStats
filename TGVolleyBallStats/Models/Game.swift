@@ -34,6 +34,7 @@ struct Game: Identifiable {
 }
 
 // TODO: Revisit if Set needs a list of players for production or if it's just needed for testing
+// MARK: We also may need to make this a class
 struct `Set`: Identifiable {
     let id = UUID()
     let players: [Player]
