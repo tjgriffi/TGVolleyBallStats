@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24411" systemVersion="25D2128" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="CDGame" representedClassName="CDGame" syncable="YES" codeGenerationType="class">
+        <attribute name="date_" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id_" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="players_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDPlayer" inverseName="games_" inverseEntity="CDPlayer"/>
+        <relationship name="vSets_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDVSet" inverseName="game_" inverseEntity="CDVSet"/>
+    </entity>
+    <entity name="CDPlayer" representedClassName="CDPlayer" syncable="YES" codeGenerationType="class">
+        <attribute name="name_" optional="YES" attributeType="String"/>
+        <attribute name="uuid_" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="games_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDGame" inverseName="players_" inverseEntity="CDGame"/>
+        <relationship name="playerDateStats_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDPlayerDateStat" inverseName="player_" inverseEntity="CDPlayerDateStat"/>
+    </entity>
+    <entity name="CDPlayerAndStat" representedClassName="CDPlayerAndStat" syncable="YES" codeGenerationType="class">
+        <attribute name="playerName" optional="YES" attributeType="String"/>
+        <attribute name="stat" optional="YES" attributeType="String"/>
+        <relationship name="rally_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDRally" inverseName="stats_" inverseEntity="CDRally"/>
+    </entity>
+    <entity name="CDPlayerDateStat" representedClassName="CDPlayerDateStat" syncable="YES" codeGenerationType="class">
+        <attribute name="date_" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="digRating_" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="freeBallRating_" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="killPercentage_" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="passRating_" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="pointScore_" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="player_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDPlayer" inverseName="playerDateStats_" inverseEntity="CDPlayer"/>
+    </entity>
+    <entity name="CDRally" representedClassName="CDRally" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="pointGained" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="rallyStart" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="rotation" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="stats_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDPlayerAndStat" inverseName="rally_" inverseEntity="CDPlayerAndStat"/>
+        <relationship name="vSet_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDVSet" inverseName="rallies_" inverseEntity="CDVSet"/>
+    </entity>
+    <entity name="CDVSet" representedClassName="CDVSet" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="game_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDGame" inverseName="vSets_" inverseEntity="CDGame"/>
+        <relationship name="players_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDPlayer"/>
+        <relationship name="rallies_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDRally" inverseName="vSet_" inverseEntity="CDRally"/>
+    </entity>
+</model>

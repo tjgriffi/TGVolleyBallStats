@@ -21,26 +21,27 @@ struct AddSetView: View {
             List {
                 Section("Rally Results") {
                     ForEach(gameViewModel.rallies, id: \.id) { rally in
-                        Text("R\(rally.rotation), Began with: \(rally.rallyStart.rawValue), Point \(rally.point == 0 ? "Lost" : "Won" )")
+                        AddSetRallyRow(rally: rally, showAddRally: $showAddRallyView)
+                    }
+                }
+                
+                Section("Save changes") {
+                    Button("Save") {
+                        // Gather all of the rally data, and create a new Set for our game
+                        gameViewModel.doneCreatingSetClicked()
+                        
+                        // We should go back to the Add Game View
+                        dismiss()
                     }
                 }
             }
-            
-            // Have a button for adding a new rally
-            Button {
-                showAddRallyView = true
-            } label: {
-                Text("Add Rally")
-            }
-
         }
         .toolbar {
-            Button("Done") {
-                // Gather all of the rally data, and create a new Set for our game
-                gameViewModel.doneCreatingSetClicked()
-                
-                // We should go back to the Add Game View
-                dismiss()
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                // Have a button for adding a new rally
+                Button("Add Rally") {
+                    showAddRallyView = true
+                }
             }
         }
         .navigationDestination(isPresented: $showAddRallyView) {
@@ -48,6 +49,21 @@ struct AddSetView: View {
         }
         .navigationTitle("Current Set")
 
+    }
+}
+
+struct AddSetRallyRow: View {
+    
+    let rally: Rally
+    @Binding var showAddRally: Bool
+    
+    var body: some View {
+        Button {
+            showAddRally = true
+        } label: {
+            Text("R\(rally.rotation), Began with: \(rally.rallyStart.rawValue), Point \(rally.point == 0 ? "Lost" : "Won" )")
+        }
+        .tint(.black)
     }
 }
 

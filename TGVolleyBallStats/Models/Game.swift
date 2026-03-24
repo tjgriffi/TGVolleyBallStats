@@ -11,7 +11,7 @@ struct Game: Identifiable {
     var id: Date { return date }
     let date: Date
     var players: [Player]
-    var sets: [`Set`] = []
+    var sets: [VSet] = []
     
     static var example: Game {
         let players = Player.examples
@@ -19,7 +19,7 @@ struct Game: Identifiable {
         return Game(
             date: Date(),
             players: players,
-            sets: (1...3).map { _ in `Set`.generateSet(withPlayers: players) }
+            sets: (1...3).map { _ in VSet.generateSet(withPlayers: players) }
         )
     }
     
@@ -35,16 +35,16 @@ struct Game: Identifiable {
 
 // TODO: Revisit if Set needs a list of players for production or if it's just needed for testing
 // MARK: We also may need to make this a class
-struct `Set`: Identifiable {
+struct VSet: Identifiable {
     let id = UUID()
     let players: [Player]
     let rallies: [Rally]
     
-    static var example: `Set` {
+    static var example: VSet {
         
         let players = Player.examples
         
-        return `Set`(
+        return VSet(
             players: players,
             rallies: players.map { player in
                 Rally.generateExampleRally(forPlayer: player.name)
@@ -52,9 +52,9 @@ struct `Set`: Identifiable {
         )
     }
     
-    static func generateSet(withPlayers players: [Player]) -> `Set` {
+    static func generateSet(withPlayers players: [Player]) -> VSet {
         
-        `Set`(
+        VSet(
             players: players,
             rallies: players.map { player in
                 Rally.generateExampleRally(forPlayer: player.name)
@@ -109,6 +109,6 @@ import Playgrounds
     let rallyExample = Rally.example
     let exampleRallies = Rally.examples
     
-    let setExample = `Set`.example
+    let setExample = VSet.example
     let gameExample = Game.example
 }

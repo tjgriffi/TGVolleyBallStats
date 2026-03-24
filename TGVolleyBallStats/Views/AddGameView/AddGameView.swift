@@ -38,6 +38,7 @@ struct AddGameView: View {
         Button {
             if !playerName.isEmpty {
                 gameViewModel.game.players.append(Player(name: playerName))
+                playerName.removeAll()
             }
         } label: {
             Rectangle()

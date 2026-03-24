@@ -96,7 +96,7 @@ struct RallyContextBarView: View {
     var body: some View {
         
         HStack {
-            Label("R\(rotation)", image: "arrow.triangle.2.circlepath")
+            Label("R\(rotation)", image: "arrow.triangle.2.circlepath.circle.fill")
             
             Picker("", selection: $startedServe) {
                 Text("Serve").tag(RallyStart.serve)

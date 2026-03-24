@@ -9,8 +9,38 @@ import Foundation
 import CoreData
 
 // Keeps track of the data utilized by the different objects
-class StorageManager {
+struct StorageManager {
+    static let shared = StorageManager()
     
+    let container: NSPersistentContainer
+    
+    init(inMemory: Bool = false) {
+        
+        container = NSPersistentContainer(name: "Model")
+        
+        if inMemory {
+            container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+        }
+        
+        container.loadPersistentStores { storeDescription, error in
+            if let error = error {
+                fatalError("Unresolved error")
+            }
+        }
+    }
+    
+    // Preview
+    static var preview: StorageManager {
+        
+        let storageManager = StorageManager(inMemory: true)
+        
+        let context = storageManager.container.viewContext
+        
+        let player = CDPlayer(name: "Tj", context: context)
+        player.games_ =
+        
+        return storageManager
+    }
     let set1Examples = VolleyBallSet(rallies: [
         Rally(
             rotation: 0,

@@ -141,7 +141,7 @@ class GameViewModel {
     var setValues: [SetValues] = []
     var statsForCurrentRally: [PlayerAndStat] = []
     var rallies: [Rally] = []
-    var sets: [Set] = []
+    var sets: [VSet] = []
     var currentRotation: Int = 1
     private var setCount = 1
     
@@ -196,7 +196,7 @@ class GameViewModel {
         GameViewModel(game: .noSets, rallies: Rally.examples)
     }
     
-    private func setupStats(for set: `Set`, setNumber: Int) -> SetValues {
+    private func setupStats(for set: VSet, setNumber: Int) -> SetValues {
         
         var kills = 0
         var digs = 0
@@ -347,7 +347,7 @@ class GameViewModel {
 
     func doneCreatingSetClicked() {
         // Add the set to the list of sets for our game object
-        let set = `Set`(players: game.players, rallies: rallies)
+        let set = VSet(players: game.players, rallies: rallies)
         game.sets.append(set)
         
         self.setValues.append(setupStats(for: set, setNumber: setCount))
