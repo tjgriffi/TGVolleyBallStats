@@ -20,6 +20,7 @@ struct TGVolleyBallStatsApp: App {
     var body: some Scene {
         WindowGroup {
             VolleyballHubView(games: games, player: player)
+                .environment(\.managedObjectContext, storageManager.container.viewContext)
 
             // MARK: Core Data
 //            MatterListView()

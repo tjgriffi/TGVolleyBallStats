@@ -16,7 +16,7 @@ class Player: Identifiable, Hashable {
         hasher.combine(id)
     }
     
-    let id = UUID()
+    let id: UUID
     let name: String
     
     static var example: Player {
@@ -28,7 +28,6 @@ class Player: Identifiable, Hashable {
         player.last10GameStats = player.last10GameStats.sorted { $0.date < $1.date }
         return player
     }
-    
     
     // An array of 6 players with 10 games each
     static var examples: [Player] {
@@ -47,11 +46,27 @@ class Player: Identifiable, Hashable {
     }
     
     init(name: String) {
+        self.id = UUID()
         self.name = name
+        self.last10GameStats = []
+    }
+    
+    init(from cdPlayer: CDPlayer) {
+        self.id = cdPlayer.uuid
+        self.name = cdPlayer.name
+        self.last10GameStats = cdPlayer.playerDateStats.map({ cdPDS in
+            PlayerDateStats(
+                date: cdPDS.date,
+                killPercentage: cdPDS.killPercentage,
+                passRating: cdPDS.passRating,
+                freeBallRating: cdPDS.freeBallRating,
+                digRating: cdPDS.digRating,
+                pointScore: cdPDS.pointScore)
+        })
     }
     
     // TODO: Determine how to grab these from CoreData, but for now just initialize them as empty
-    private(set) var last10GameStats: [PlayerDateStats] = []
+    private(set) var last10GameStats: [PlayerDateStats]
     
     // Update the player's stats with the latest stats from a game
     func addNewGameStats(stats: [Stats], date: Date) {
@@ -153,11 +168,10 @@ struct PlayerAndStat: Identifiable {
     }
 }
 
-import Playgrounds
-
-#Playground {
-    let playerAndStat = PlayerAndStat.example
-    
-    let playersRallyStats = PlayerAndStat.examples
-    let customPlayerRallyStats = PlayerAndStat.generateExamples(with: "Ryan")
-}
+//import Playgrounds
+//#Playground {
+//    let playerAndStat = PlayerAndStat.example
+//    
+//    let playersRallyStats = PlayerAndStat.examples
+//    let customPlayerRallyStats = PlayerAndStat.generateExamples(with: "Ryan")
+//}

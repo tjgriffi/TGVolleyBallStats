@@ -76,7 +76,7 @@ extension CDPlayerDateStat {
     
     // MARK: Example
     static var example: CDPlayerDateStat {
-        let context = StorageManager.shared.container.viewContext
+        let context = StorageManager.preview.container.viewContext
         
         let playerDateStat = CDPlayerDateStat(
             date: Date(),

@@ -10,11 +10,11 @@ import CoreData
 
 extension CDGame {
     
-    var id: UUID {
+    var uuid: UUID {
         #if DEBUG
-        id_!
+        uuid_!
         #else
-        id_ ?? UUID()
+        uuid_ ?? UUID()
         #endif
     }
     
@@ -38,7 +38,7 @@ extension CDGame {
     
     // MARK: Initial setup
     override public func awakeFromInsert() {
-        self.id_ = UUID()
+        self.uuid_ = UUID()
     }
     
     convenience init(date: Date, context: NSManagedObjectContext) {
@@ -66,9 +66,29 @@ extension CDGame {
     // MARK: Example
     static var example: CDGame {
         
-        let context = StorageManager.shared.container.viewContext
+        let context = StorageManager.preview.container.viewContext
         
         let game = CDGame(date: Date(), context: context)
+        
+        // Setup the set
+        let set1 = CDVSet(context: context)
+        
+        // Setup the rallies
+        let arrayVals = Array(0...20)
+        
+        set1.rallies = arrayVals.reduce(into: Set<CDRally>()) { result, value in
+            
+            let rally = CDRally(pointGained: .random(), rallyStart: .random(), rotation: Int16(value/6) + 1, context: context)
+            
+            rally.stats = [1,2,3,4,5].reduce(into: Set<CDPlayerAndStat>()) { stats, _ in
+                
+                stats.insert(CDPlayerAndStat(playerName: VBSConstants.coreDataPlayerName, stat: Stats.allCases.randomElement()?.rawValue ?? "ace", context: context))
+            }
+            
+            result.insert(rally)
+        }
+        
+        game.sets.formUnion([set1])
         
         return game
     }

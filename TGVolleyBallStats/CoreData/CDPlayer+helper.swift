@@ -10,7 +10,7 @@ import CoreData
 
 extension CDPlayer {
     
-    var id: UUID {
+    var uuid: UUID {
         #if DEBUG
         uuid_!
         #else
@@ -61,7 +61,7 @@ extension CDPlayer {
     
     // Example
     static var example: CDPlayer {
-        let context = StorageManager.shared.container.viewContext
+        let context = StorageManager.preview.container.viewContext
         
         let player = CDPlayer(name: "Tester", context: context)
         

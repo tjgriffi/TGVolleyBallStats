@@ -29,7 +29,23 @@ struct StorageManager {
         }
     }
     
-    // Preview
+    // Save changes to the context
+    func save() {
+        
+        // Check if the context actually has changes
+        let context = container.viewContext
+        
+        guard context.hasChanges else { return }
+        
+        do {
+            try context.save()
+        } catch {
+            print("error saving context: \(error)")
+        }
+        
+    }
+    
+    // MARK: Preview
     static var preview: StorageManager {
         
         let storageManager = StorageManager(inMemory: true)
@@ -37,10 +53,10 @@ struct StorageManager {
         let context = storageManager.container.viewContext
         
         let player = CDPlayer(name: "Tj", context: context)
-        player.games_ =
         
         return storageManager
     }
+    
     let set1Examples = VolleyBallSet(rallies: [
         Rally(
             rotation: 0,
