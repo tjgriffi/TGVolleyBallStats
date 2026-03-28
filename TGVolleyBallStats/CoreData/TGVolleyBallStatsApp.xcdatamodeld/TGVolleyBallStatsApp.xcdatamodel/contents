@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="24411" systemVersion="25D2128" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="CDExample" representedClassName="CDExample" syncable="YES" codeGenerationType="class">
+        <attribute name="value" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
     <entity name="CDGame" representedClassName="CDGame" syncable="YES" codeGenerationType="class">
         <attribute name="date_" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="uuid_" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
@@ -11,6 +14,7 @@
         <attribute name="uuid_" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="games_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDGame" inverseName="players_" inverseEntity="CDGame"/>
         <relationship name="playerDateStats_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDPlayerDateStat" inverseName="player_" inverseEntity="CDPlayerDateStat"/>
+        <relationship name="vSet_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDVSet" inverseName="players_" inverseEntity="CDVSet"/>
     </entity>
     <entity name="CDPlayerAndStat" representedClassName="CDPlayerAndStat" syncable="YES" codeGenerationType="class">
         <attribute name="playerName_" optional="YES" attributeType="String"/>
@@ -37,7 +41,7 @@
     <entity name="CDVSet" representedClassName="CDVSet" syncable="YES" codeGenerationType="class">
         <attribute name="uuid_" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="game_" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDGame" inverseName="vSets_" inverseEntity="CDGame"/>
-        <relationship name="players_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDPlayer"/>
+        <relationship name="players_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDPlayer" inverseName="vSet_" inverseEntity="CDPlayer"/>
         <relationship name="rallies_" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDRally" inverseName="vSet_" inverseEntity="CDRally"/>
     </entity>
 </model>

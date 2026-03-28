@@ -26,6 +26,7 @@ class CDPlayerRepository: PlayerRepository {
     }
     
     func fetchPlayers() -> [Player] {
+
         let request = CDPlayer.fetch()
         
         do {
@@ -46,7 +47,7 @@ class CDPlayerRepository: PlayerRepository {
             
             return players
         } catch {
-            print("Error fetching the players: \(error)")
+            print("CDPlayerRepository: fetchPlayers: Error fetching the players: \(error)")
         }
         
         // TODO: Need to signify that somethings has gone wrong here (but the error might already do that for us)

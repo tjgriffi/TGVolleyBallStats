@@ -20,3 +20,4 @@ This is a list of Tasks that still need to be completed for the MVP
 10.  Create a screen to choose which player to view information on
 11.  Determine how to store the rally information to ensure it stays in the appropriate order when fetched
 +  Could look into using Date().  That would enable me to keep them in the order that they were set up in (that or I could use an integer)
+12.  Look into setting up the trendline for the actual values.  The line seemed off when running the initial tests using a Data Transfer Object

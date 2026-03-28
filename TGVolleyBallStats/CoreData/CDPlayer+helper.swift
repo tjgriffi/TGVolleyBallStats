@@ -28,6 +28,11 @@ extension CDPlayer {
         set { playerDateStats_ = newValue as NSSet }
     }
     
+    var games: Set<CDGame> {
+        get { (games_ as? Set<CDGame>) ?? [] }
+        set { games_ = newValue as NSSet }
+    }
+    
     // Setup the UUID here where the most critical values are needed
     public override func awakeFromInsert() {
         self.uuid_ = UUID()
@@ -61,10 +66,26 @@ extension CDPlayer {
     
     // Example
     static var example: CDPlayer {
+
         let context = StorageManager.preview.container.viewContext
+
+        let player = CDPlayer(name: VBSConstants.coreDataPlayerName, context: context)
         
-        let player = CDPlayer(name: "Tester", context: context)
+        var stats = [CDPlayerDateStat]()
         
+        [1...3].forEach({ _ in
+            let stat = CDPlayerDateStat(
+                date: Date(),
+                digRating: .random(in: (0...1)),
+                passRating: .random(in: (0...1)),
+                killPercentage: .random(in: (0...1)),
+                freeBallRating: .random(in: (0...1)),
+                pointScore: .random(in: (0...10)),
+                context: context)
+            stat.player_ = player
+            stats.append(stat)
+        })
+                
         return player
     }
 }

@@ -11,31 +11,29 @@ struct GameHubView: View {
     @State var gameHubViewModel: GameHubViewModel
     
     var body: some View {
-        NavigationStack {
-            ZStack(alignment: .bottom) {
-                List {
-                    ForEach(gameHubViewModel.games) { game in
-                        NavigationLink {
-                            GameView(gameViewModel: GameViewModel(game: game))
-                        } label: {
-                            GameHubListCell(game: game)
-                        }
-                    }
-                }
-                .toolbar {
+        ZStack(alignment: .bottom) {
+            List {
+                ForEach(gameHubViewModel.games) { game in
                     NavigationLink {
-                        // TODO: Need to evaluate if we want to pass in the gameviewmodel or gamehubviewmodel and then determine how we will pass the game value around
-                        // TODO: Need to determine when the creation/addition of players commences
-                        AddGameView(gameViewModel: GameViewModel(game: Game(date: Date(), players: [])))
+                        GameView(gameViewModel: GameViewModel(game: game))
                     } label: {
-//                        AddGameListView()
-                        Image(systemName: "plus.circle.fill")
-                            .foregroundStyle(.blue)
+                        GameHubListCell(game: game)
                     }
                 }
             }
-            .navigationTitle("Games")
+            .toolbar {
+                NavigationLink {
+                    // TODO: Need to evaluate if we want to pass in the gameviewmodel or gamehubviewmodel and then determine how we will pass the game value around
+                    // TODO: Need to determine when the creation/addition of players commences
+                    AddGameView(gameViewModel: GameViewModel(game: Game(date: Date(), players: [])))
+                } label: {
+//                        AddGameListView()
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundStyle(.blue)
+                }
+            }
         }
+        .navigationTitle("Games")
     }
 }
 

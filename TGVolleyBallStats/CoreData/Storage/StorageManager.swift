@@ -16,7 +16,7 @@ struct StorageManager {
     
     init(inMemory: Bool = false) {
         
-        container = NSPersistentContainer(name: "Model")
+        container = NSPersistentContainer(name: "TGVolleyBallStatsApp")
         
         if inMemory {
             container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
@@ -24,7 +24,7 @@ struct StorageManager {
         
         container.loadPersistentStores { storeDescription, error in
             if let error = error {
-                fatalError("Unresolved error")
+                fatalError("Unresolved error: \(error)")
             }
         }
     }
@@ -47,355 +47,57 @@ struct StorageManager {
     
     // MARK: Preview
     static var preview: StorageManager {
-        
         let storageManager = StorageManager(inMemory: true)
         
         let context = storageManager.container.viewContext
         
-        let player = CDPlayer(name: "Tj", context: context)
+        // Setup a player
+        let player = CDPlayer(name: VBSConstants.coreDataPlayerName, context: context)
         
+        var stats = [CDPlayerDateStat]()
+        
+        (1...3).forEach({ _ in
+            let stat = CDPlayerDateStat(
+                date: Date(),
+                digRating: .random(in: (0...1)),
+                passRating: .random(in: (0...1)),
+                killPercentage: .random(in: (0...1)),
+                freeBallRating: .random(in: (0...1)),
+                pointScore: .random(in: (0...10)),
+                context: context)
+            stat.player_ = player
+            print("stat: \(stat)")
+            stats.append(stat)
+        })
+        
+        // Setup a game
+        let game1 = CDGame(date: Date(), context: context)
+        
+        // Setup the set
+        let set = CDVSet(context: context)
+        
+        // Setup the rallies
+        let arrayVals = Array(0...20)
+        
+        set.rallies = arrayVals.reduce(into: Set<CDRally>()) { result, value in
+            
+            let rally = CDRally(pointGained: .random(), rallyStart: .random(), rotation: Int16(value/6) + 1, context: context)
+            
+            rally.stats = [1,2,3,4,5].reduce(into: Set<CDPlayerAndStat>()) { stats, _ in
+                
+                stats.insert(CDPlayerAndStat(playerName: VBSConstants.coreDataPlayerName, stat: Stats.allCases.randomElement()?.rawValue ?? "ace", context: context))
+            }
+            
+            result.insert(rally)
+        }
+                
+        player.playerDateStats = Set(stats)
+        
+        game1.sets.formUnion([set])
+        
+        player.games = Set([game1])
+        game1.players = Set([player])
+                
         return storageManager
     }
-    
-    let set1Examples = VolleyBallSet(rallies: [
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ), Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 0,
-            stats: [
-                PlayerAndStat(player: "Lem", stat: .serve0),
-                PlayerAndStat(player: "Mitchell", stat: .pass2),
-                PlayerAndStat(player: "Meghan", stat: .set),
-                PlayerAndStat(player: "TJ", stat: .hitError)
-                   ]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        )
-    ])
-    let set2Examples = VolleyBallSet(rallies: [
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        ),
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        )
-    ])
-    let set3Examples = VolleyBallSet(rallies: [
-        Rally(
-            rotation: 0,
-            rallyStart: .serve,
-            point: 1,
-            stats: [PlayerAndStat(player: "Lem", stat: .ace)]
-        )
-    ])
-    let playerExamples = ["TJ", "Karen", "Mitchell", "Lem", "Ryan", "Megan"]
 }

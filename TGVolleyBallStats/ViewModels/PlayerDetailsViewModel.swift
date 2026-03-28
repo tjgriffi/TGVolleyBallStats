@@ -63,13 +63,14 @@ import Foundation
         let sumX = (0..<Int(n)).reduce(0.0) { $0 + Double($1)}
         var sumXY = 0.0
         
+        // TODO: See if doing index+1 works as intended
         for (index, statValue) in stats.enumerated() {
-            sumXY = sumXY + (Double(index) * statValue)
+            sumXY = sumXY + (Double(index + 1) * statValue)
         }
         
         var sumX2 = 0.0
         for index in 0..<stats.count {
-            sumX2 += Double(index * index)
+            sumX2 += Double((index + 1) * (index+1))
         }
         
         let numerator = (n * sumXY) - (sumX * sumY)
@@ -93,8 +94,6 @@ import Foundation
         stats.enumerated().forEach({
             ssRes += pow($0.element - trendLine.generatePointFor(Double($0.offset)), 2)
         })
-            
-        let rSquared = ssTotal != 0 ? 1 - (ssRes / ssTotal) : 1
                 
         return TrendLine(slope: slope, intercept: intercept)
     }
@@ -141,8 +140,9 @@ import Foundation
         return percentage
     }
     
+    // TODO: Need to clean up how this works for single entries
     func getAListOfStat(_ stat: ChartPlayerStats) -> [GameDateStatTrendPoint] {
-        
+                
         var stats: [Double]
         var chartStatDoubleDict: [ChartPlayerStats: [Double]] = [:]
         
@@ -158,11 +158,11 @@ import Foundation
         case .points:
             stats = last10Games.map { Double($0.passRating) }
         }
-        
+                
         if let trendLine = generateTrendLine(stats: stats) {
             chartStatDoubleDict[stat, default: []] = generateAListOfTrendPoints(trendline: trendLine, stat: stat)
         }
-        
+                
         var index = 0
         var listOfStats: [GameDateStatTrendPoint] = []
         last10Games.forEach { game in
