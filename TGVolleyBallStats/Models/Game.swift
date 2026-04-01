@@ -8,27 +8,56 @@
 import Foundation
 
 struct Game: Identifiable {
-    var id: Date { return date }
+    var id: UUID/*Date { return date }*/
     let date: Date
-    var players: [Player]
+    var playerIDs: [UUID]
     var sets: [VSet] = []
     
+    init(id: UUID, date: Date, players: [UUID], sets: [VSet]) {
+        self.id = id
+        self.date = date
+        self.playerIDs = players
+        self.sets = sets
+    }
+    
+    init(from cdGame: CDGame){
+        
+        
+        self.id = cdGame.uuid
+        self.date = cdGame.date
+        self.playerIDs = []
+        
+        // TODO: Need to finish these setups after the pa
+//        self.players = Array(cdGame.players)
+//        self.sets = Array(cdGame.sets)
+        
+        var cdPlayers = [Player]()
+        
+        cdGame.sets.forEach { cdVSet in
+            
+            sets.append(VSet(from: cdVSet))
+        }
+    }
+    
+    // TODO: Need to fix the examples now that we're using IDs
     static var example: Game {
-        let players = Player.examples
+        let playerIDs = Player.examples.map { $0.id }
         
         return Game(
+            id: UUID(),
             date: Date(),
-            players: players,
-            sets: (1...3).map { _ in VSet.generateSet(withPlayers: players) }
+            players: playerIDs,
+            sets: []/*(1...3).map { _ in VSet.generateSet(withPlayers: players) }*/
         )
     }
     
     static var noSets: Game {
-        let players = Player.examples
+        let playerIDs = Player.examples.map { $0.id }
         
         return Game(
+            id: UUID(),
             date: Date(),
-            players: players
+            players: playerIDs, sets: []
         )
     }
 }
@@ -36,16 +65,32 @@ struct Game: Identifiable {
 // TODO: Revisit if Set needs a list of players for production or if it's just needed for testing
 // MARK: We also may need to make this a class
 struct VSet: Identifiable {
-    let id = UUID()
-    let players: [Player]
+    let id: UUID
+    let players: [Player] //TODO: Remove players
     let rallies: [Rally]
+    
+    init(id: UUID, players: [Player], rallies: [Rally]) {
+        self.id = id
+        self.players = players
+        self.rallies = rallies
+    }
+    
+    init(from cdVSet: CDVSet) {
+        
+        self.id = cdVSet.uuid
+        self.players = []
+        
+        self.rallies = cdVSet.rallies.map({ cdRally in
+            Rally(from: cdRally)
+        })
+    }
     
     static var example: VSet {
         
         let players = Player.examples
         
         return VSet(
-            players: players,
+            id: UUID(), players: players,
             rallies: players.map { player in
                 Rally.generateExampleRally(forPlayer: player.name)
             }
@@ -55,7 +100,7 @@ struct VSet: Identifiable {
     static func generateSet(withPlayers players: [Player]) -> VSet {
         
         VSet(
-            players: players,
+            id: UUID(), players: players,
             rallies: players.map { player in
                 Rally.generateExampleRally(forPlayer: player.name)
             }
@@ -64,15 +109,35 @@ struct VSet: Identifiable {
 }
 
 struct Rally: Identifiable {
-    var id = UUID()
+    let id: UUID
     let rotation: Int
     let rallyStart: RallyStart
     let point: Int
     let stats: [PlayerAndStat]
     
+    init(id: UUID, rotation: Int, rallyStart: RallyStart, point: Int, stats: [PlayerAndStat]) {
+        self.id = id
+        self.rotation = rotation
+        self.rallyStart = rallyStart
+        self.point = point
+        self.stats = stats
+    }
+    
+    init(from cdRally: CDRally){
+        
+        self.id = cdRally.uuid
+        self.rotation = Int(cdRally.rotation)
+        self.rallyStart = cdRally.rallyStart ? .serve : .receive // True (serve) False (receive)
+        self.point = cdRally.pointGained ? 1 : 0
+        
+        self.stats = cdRally.stats.map({ cdPlayerAndStat in
+            PlayerAndStat(from: cdPlayerAndStat)
+        })
+    }
+    
     static var example: Rally {
         Rally(
-            rotation: (1...6).randomElement()!,
+            id: UUID(), rotation: (1...6).randomElement()!,
             rallyStart: .allCases.randomElement()!,
             point: (0...1).randomElement()!,
             stats: PlayerAndStat.examples
@@ -81,9 +146,9 @@ struct Rally: Identifiable {
     
     static var examples: [Rally] {
         
-        var rallies = ["Tj", "John", "Jane", "Sarah", "Michael", "Nancy"].map { name in
+        let rallies = ["Tj", "John", "Jane", "Sarah", "Michael", "Nancy"].map { name in
             Rally(
-                rotation: (1...6).randomElement()!,
+                id: UUID(), rotation: (1...6).randomElement()!,
                 rallyStart: .allCases.randomElement()!,
                 point: (0...1).randomElement()!,
                 stats: PlayerAndStat.generateExamples(with: name)
@@ -95,7 +160,7 @@ struct Rally: Identifiable {
     
     static func generateExampleRally(forPlayer name: String) -> Rally {
         Rally(
-            rotation: (1...6).randomElement()!,
+            id: UUID(), rotation: (1...6).randomElement()!,
             rallyStart: .allCases.randomElement()!,
             point: (0...1).randomElement()!,
             stats: PlayerAndStat.generateExamples(with: name)
@@ -103,12 +168,12 @@ struct Rally: Identifiable {
     }
 }
 
-import Playgrounds
-
-#Playground {
-    let rallyExample = Rally.example
-    let exampleRallies = Rally.examples
-    
-    let setExample = VSet.example
-    let gameExample = Game.example
-}
+//import Playgrounds
+//
+//#Playground {
+//    let rallyExample = Rally.example
+//    let exampleRallies = Rally.examples
+//    
+//    let setExample = VSet.example
+//    let gameExample = Game.example
+//}

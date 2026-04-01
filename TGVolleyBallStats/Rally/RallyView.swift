@@ -59,7 +59,7 @@ struct RallyView: View {
                 .pickerStyle(.menu)
                 Button("Add Another Stat") {
                     if stat != .none {
-                        playerAndStats.append(PlayerAndStat(player: playerName, stat: stat))
+                        playerAndStats.append(PlayerAndStat(id: UUID(), player: playerName, stat: stat))
                         
                         // Reset the appropriate values
                         playerName = names.first ?? "Player name"
@@ -83,13 +83,14 @@ struct RallyView: View {
             // MARK:  Store/Send up the saved Rally
             // Store the Rotation, RallyStart and PlayerNameAndStat values into a rally object
             self.rally = Rally(
-                rotation: rotation,
+                id: UUID(), rotation: rotation,
                 rallyStart: rallyStart,
                 point: pointGained,
                 stats: playerAndStats)
             
             // Update the setViewModel's rallies
-            onCompletion(rally ?? Rally(rotation: 0, rallyStart: RallyStart.serve, point: 0, stats: []))
+            // TODO: Investigate if this onCompletion is still needed
+            onCompletion(rally ?? Rally(id: UUID(), rotation: 0, rallyStart: RallyStart.serve, point: 0, stats: []))
             
             // Navigate backwards in the navigation stack
             router.goBack()

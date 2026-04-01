@@ -13,15 +13,15 @@ struct AddGameView: View {
     var body: some View {
         Text("Players: ")
         HStack {
-            ForEach(gameViewModel.game.players) { player in
-                Rectangle()
-                    .overlay {
-                        Text(player.name)
-                            .foregroundStyle(.white)
-                    }
-                    .frame(width: 50,height: 50)
-                    .foregroundStyle(.green)
-            }
+//            ForEach(gameViewModel.game.players) { player in
+//                Rectangle()
+//                    .overlay {
+//                        Text(player.name)
+//                            .foregroundStyle(.white)
+//                    }
+//                    .frame(width: 50,height: 50)
+//                    .foregroundStyle(.green)
+//            }
         }
         List {
             ForEach(gameViewModel.setValues) { set in
@@ -37,7 +37,8 @@ struct AddGameView: View {
             .padding()
         Button {
             if !playerName.isEmpty {
-                gameViewModel.game.players.append(Player(name: playerName))
+                // TODO: Need to add a player's name here using the uuid
+//                gameViewModel.game.players.append(Player(name: playerName))
                 playerName.removeAll()
             }
         } label: {
@@ -64,9 +65,9 @@ struct AddGameView: View {
                 .frame(width: 200,height: 50)
                 .cornerRadius(20)
                 .foregroundStyle(.blue)
-                .opacity(gameViewModel.game.players.isEmpty ? 0.5 : 1)
+                .opacity(gameViewModel.game.playerIDs.isEmpty ? 0.5 : 1)
         }
-        .disabled(gameViewModel.game.players.isEmpty)
+        .disabled(gameViewModel.game.playerIDs.isEmpty)
     }
 }
 

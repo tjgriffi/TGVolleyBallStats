@@ -66,7 +66,6 @@ struct StorageManager {
                 pointScore: .random(in: (0...10)),
                 context: context)
             stat.player_ = player
-            print("stat: \(stat)")
             stats.append(stat)
         })
         

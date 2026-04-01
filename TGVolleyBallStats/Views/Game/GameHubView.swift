@@ -25,7 +25,7 @@ struct GameHubView: View {
                 NavigationLink {
                     // TODO: Need to evaluate if we want to pass in the gameviewmodel or gamehubviewmodel and then determine how we will pass the game value around
                     // TODO: Need to determine when the creation/addition of players commences
-                    AddGameView(gameViewModel: GameViewModel(game: Game(date: Date(), players: [])))
+                    AddGameView(gameViewModel: GameViewModel(game: Game(id: UUID(), date: Date(), players: [], sets: [])))
                 } label: {
 //                        AddGameListView()
                     Image(systemName: "plus.circle.fill")

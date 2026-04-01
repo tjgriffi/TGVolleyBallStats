@@ -150,21 +150,33 @@ struct PlayerDateStats: Identifiable {
 struct PlayerAndStat: Identifiable {
     let player: String
     let stat: Stats
-    let id = UUID()
+    let id: UUID
+    
+    init(id: UUID = UUID(), player: String, stat: Stats) {
+        self.id = id
+        self.player = player
+        self.stat = stat
+    }
+    
+    init(from cdPlayerAndStat: CDPlayerAndStat) {
+        self.id = UUID() // MARK: Investigate if it's ok to just give it a UUID here/if the id is even needed
+        self.player = cdPlayerAndStat.playerName
+        self.stat = Stats(rawValue: cdPlayerAndStat.stat) ?? .none // MARK: Need to log some sort of error if the stat type can't be found
+    }
     
     static var example: PlayerAndStat {
-        PlayerAndStat(player: "TJ", stat: Stats.allCases.randomElement() ?? .ace)
+        PlayerAndStat(id: UUID(), player: "TJ", stat: Stats.allCases.randomElement() ?? .ace)
     }
     
     static var examples: [PlayerAndStat] {
         let player = "TJ"
                 
-        return (0...4).map {_ in PlayerAndStat(player: player, stat: Stats.allCases.randomElement() ?? .ace) }
+        return (0...4).map {_ in PlayerAndStat(id: UUID(), player: player, stat: Stats.allCases.randomElement() ?? .ace) }
     }
     
     static func generateExamples(with name: String) -> [PlayerAndStat] {
         
-        return (0...4).map {_ in PlayerAndStat(player: name, stat: Stats.allCases.randomElement() ?? .ace) }
+        return (0...4).map {_ in PlayerAndStat(id: UUID(), player: name, stat: Stats.allCases.randomElement() ?? .ace) }
     }
 }
 

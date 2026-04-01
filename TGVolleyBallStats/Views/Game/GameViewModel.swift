@@ -40,7 +40,7 @@ class VolleyBallSet: Identifiable {
             rallyCount += 1
             
             var playerStats = [PlayerAndStat]()
-            playerStats.append(PlayerAndStat(player: players.randomElement()?.name ?? "Jacob", stat: Stats.allCases.randomElement() ?? .pass1))
+            playerStats.append(PlayerAndStat(id: UUID(), player: players.randomElement()?.name ?? "Jacob", stat: Stats.allCases.randomElement() ?? .pass1))
             
             // Case where the rally ends on the first action
             if !isEndOfRally(stat: playerStats.last!.stat) {
@@ -75,7 +75,7 @@ class VolleyBallSet: Identifiable {
             // Play out the rally
             while isEndOfRally(stat: playerStats.last!.stat) || playerStats.count < 27 {
                 
-                playerStats.append(PlayerAndStat(player: players.randomElement()?.name ?? "Jacob", stat: Stats.allCases.randomElement() ?? .hitError))
+                playerStats.append(PlayerAndStat(id: UUID(), player: players.randomElement()?.name ?? "Jacob", stat: Stats.allCases.randomElement() ?? .hitError))
             }
             
             // Check if points were gained
@@ -347,10 +347,11 @@ class GameViewModel {
 
     func doneCreatingSetClicked() {
         // Add the set to the list of sets for our game object
-        let set = VSet(players: game.players, rallies: rallies)
-        game.sets.append(set)
-        
-        self.setValues.append(setupStats(for: set, setNumber: setCount))
+        //TODO: Need to fix this before testing out parts of the app
+//        let set = VSet(players: game.players, rallies: rallies)
+//        game.sets.append(set)
+//        
+//        self.setValues.append(setupStats(for: set, setNumber: setCount))
         setCount += 1
         
         // Reset all of the other values
@@ -363,7 +364,7 @@ class GameViewModel {
         // MARK: Add guards for making sure that the information is correct
         // ex: 0 < rotation < 7, entries is not empty
         let rally = Rally(
-            rotation: rotation,
+            id: UUID(), rotation: rotation,
             rallyStart: rallyStart,
             point: pointGained ? 1 : 0,
             stats: entries

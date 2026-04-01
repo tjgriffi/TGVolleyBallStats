@@ -56,7 +56,7 @@ extension CDGame {
         
         let request = CDGame.fetchRequest()
         
-        request.sortDescriptors = [NSSortDescriptor(key: "\(\CDGame.date_)", ascending: true)]
+//        request.sortDescriptors = [NSSortDescriptor(key: "\(\CDGame.date_)", ascending: true)]
         
         request.predicate = predicate
         

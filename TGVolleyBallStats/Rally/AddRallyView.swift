@@ -71,7 +71,7 @@ struct AddRallyView: View {
         } content: {
             if let name = selectedName, let stat = selectedStat {
                 AddRallySheet(
-                    playerNames: gameViewModel.game.players.map { $0.name },
+                    playerNames: gameViewModel.game.playerIDs.map { $0.uuidString /*MARK: Need to address this issue (uuid is not a name) */ },
                     selectedName: name,
                     selectedStat: stat,
                     entries: $entries, indexToEdit: entries.firstIndex(where: { entry in
@@ -80,7 +80,7 @@ struct AddRallyView: View {
                 )
             } else {
                 AddRallySheet(
-                    playerNames: gameViewModel.game.players.map { $0.name },
+                    playerNames: gameViewModel.game.playerIDs.map { $0.uuidString /*MARK: Need to address this issue (uuid is not a name) */ },
                     entries: $entries
                 )
             }
