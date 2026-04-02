@@ -34,11 +34,16 @@ struct GameHubView: View {
             }
         }
         .navigationTitle("Games")
+        .task {
+            gameHubViewModel.loadGames()
+        }
     }
 }
 
 #Preview("GameHubView") {
-    GameHubView(gameHubViewModel: GameHubViewModel(games: [Game.example]))
+    NavigationStack {
+        GameHubView(gameHubViewModel: GameHubViewModel(gameRepository: CDGameRepository(storageManager: StorageManager.preview, cache: GameCache())))
+    }
 }
 
 struct GameHubListCell: View {

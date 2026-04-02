@@ -6,9 +6,9 @@ This is a list of Tasks that still need to be completed for the MVP
 
 <!--1.  Need a way to store the various amounts of data around the players and the game information-->
 <!--2.  Need to be able to save any changes to data-->
-3.  Need to fetch the information on command
-+  Fetch Relevant Game data on the game screen
-+  Fetch Player data on the player screen
+<!--3.  Need to fetch the information on command-->
+<!--+  Fetch Relevant Game data on the game screen-->
+<!--+  Fetch Player data on the player screen-->
 4.  Need to be able to edit game or player information
 5.  Edit Set information
 6.  Edit Rally information
@@ -30,6 +30,8 @@ This is a list of Tasks that still need to be completed for the MVP
 18.  Guest name
 19.  Save game/player
 20.  Domain model with references
-21.  A central cache/registry that holds the actual data models
-   + Player Cache
-22.  Repository just looks at the caches
+<!--21.  A central cache/registry that holds the actual data models-->
+<!--   + Player Cache-->
+<!--   + Game Cache-->
+<!--22.  Repository just looks at the caches-->
+23.  Model the UI for setting up the Rally (PlayerAndStat) off of the UI for setting up a new event in the iOS calendar

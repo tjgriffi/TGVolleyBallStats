@@ -9,25 +9,33 @@ import Foundation
 import CoreData
 
 protocol GameRepository {
-    func fetchGames()
     func saveGame(_ game: Game)
-    func deleteGame(_ game: Game)
+    func getGame(with id: UUID) -> Game?
+    func deleteGame(withID id: UUID)
+    func getGames() -> [Game]
 }
 
 class CDGameRepository: GameRepository {
-    
-    private let context: NSManagedObjectContext
+  
+    private let storageManager: StorageManager
     private let cache: any BaseCache<Game>
     
-    init(context: NSManagedObjectContext, cache: any BaseCache<Game> = GameCache.shared) {
-        self.context = context
+    init(
+        storageManager: StorageManager = StorageManager.shared,
+        cache: any BaseCache<Game> = GameCache.shared) {
+        self.storageManager = storageManager
         self.cache = cache
+        
+            // Initial setup
+            fetchGames()
     }
     
-    func fetchGames() {
+    private func fetchGames() {
         
         let request = CDGame.fetch()
         cache.clear()
+        
+        let context = storageManager.container.viewContext
         
         do {
             let cdGames = try context.fetch(request)
@@ -47,11 +55,66 @@ class CDGameRepository: GameRepository {
     }
     
     func saveGame(_ game: Game) {
-        // TODO: Need to add functionality
+        
+        // Update the backend
+        let cdGame = CDGame(date: game.date, context: storageManager.container.viewContext)
+        storageManager.save()
+        
+        // Create a game for the local cache
+        let game = Game(from: cdGame)
+        
+        cache.setValue(game)
     }
     
-    func deleteGame(_ game: Game) {
-        // TODO: Need to add implementation
+    func getGame(with id: UUID) -> Game? {
+        
+        return cache.get(id)
+    }
+    
+    func deleteGame(withID id: UUID) {
+        // Grab the cdGame object
+        guard let cdGame = fetchCDGame(withID: id) else {
+            print("deleteGame: No game object to delete")
+            return
+        }
+        
+        // Remove it from CoreData
+        CDGame.delete(cdGame)
+        
+        // Remove it from the cache
+        cache.remove(id)
+    }
+    
+    func getGames() -> [Game] {
+        return cache.getAll()
+    }
+    
+    // MARK: Helper functions
+    
+    /// Grabs the CDGame DTO that corresponds to the given UUID
+    /// - Parameter id: The UUID of the Game object
+    /// - Returns: the CDGame DTO
+    private func fetchCDGame(withID id: UUID) -> CDGame? {
+        
+        let request = CDGame.fetchRequest()
+        
+        request.predicate = NSPredicate(format: "uuid == %@", id as CVarArg)
+        
+        do {
+            let cdGame = try storageManager.container.viewContext.fetch(request)
+            
+            if cdGame.count > 1 {
+                // MARK: Need to add proper error handling
+                print("fetchCDGame: Error there is more than one CDGame with this uuid: \(id)")
+            }
+            
+            return cdGame.first
+        } catch {
+            // MARK: Need to add proper error handling
+            print("fetchCDGame: Error grabbing the CDGame object \(error)")
+        }
+        
+        return nil
     }
 }
 

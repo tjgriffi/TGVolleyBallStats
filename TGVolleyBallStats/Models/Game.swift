@@ -7,7 +7,11 @@
 
 import Foundation
 
-struct Game: Identifiable {
+struct Game: Identifiable, Equatable {
+    static func == (lhs: Game, rhs: Game) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     var id: UUID/*Date { return date }*/
     let date: Date
     var playerIDs: [UUID]
@@ -27,12 +31,7 @@ struct Game: Identifiable {
         self.date = cdGame.date
         self.playerIDs = []
         
-        // TODO: Need to finish these setups after the pa
-//        self.players = Array(cdGame.players)
-//        self.sets = Array(cdGame.sets)
-        
-        var cdPlayers = [Player]()
-        
+                
         cdGame.sets.forEach { cdVSet in
             
             sets.append(VSet(from: cdVSet))

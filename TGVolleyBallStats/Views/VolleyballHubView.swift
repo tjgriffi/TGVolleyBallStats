@@ -9,8 +9,9 @@ import SwiftUI
 
 struct VolleyballHubView: View {
     
-    var games: [Game]
-    var player: Player
+//    var games: [Game]
+//    var player: Player
+    @Environment(\.storageManager) var storageManager
     
     @Environment(\.managedObjectContext) var context
     
@@ -18,11 +19,14 @@ struct VolleyballHubView: View {
         TabView {
             Tab("Games", systemImage: "volleyball") {
                 NavigationStack {
-                    GameHubView(gameHubViewModel: GameHubViewModel(games: games))
+                    GameHubView(
+                        gameHubViewModel: GameHubViewModel(
+                            gameRepository: CDGameRepository(
+                                storageManager: storageManager))
+                    )
                 }
             }
             Tab("Player", systemImage: "figure.volleyball") {
-//                PlayerOverviewView(playerDetailsViewModel: PlayerDetailsViewModel(player: player))
                 NavigationStack{
                     ChoosePlayerView(choosePlayerVM: ChoosePlayerVM(playerRepository: CDPlayerRepository(context: context)))
                 }
@@ -32,6 +36,7 @@ struct VolleyballHubView: View {
 }
 
 #Preview {
-    VolleyballHubView(games: [Game.example], player: Player.example)
+    VolleyballHubView()
         .environment(\.managedObjectContext, StorageManager.preview.container.viewContext)
+        .environment(\.storageManager, StorageManager.preview)
 }

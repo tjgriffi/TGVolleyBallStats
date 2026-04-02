@@ -11,6 +11,8 @@ import CoreData
 protocol PlayerRepository {
     func savePlayer(_ name: String)
     func getPlayers(with ids: [UUID]) -> [Player]
+    func deletePlayer(withID id: UUID)
+    func getPlayers() -> [Player]
 }
 
 class CDPlayerRepository: PlayerRepository {
@@ -43,9 +45,6 @@ class CDPlayerRepository: PlayerRepository {
             cache.clear()
             
             cdPlayers.forEach { cdPlayer in
-
-                // Grab the stats for this player
-//                cdPlayer.playerDateStats = playerDateStatRepository.fetchPlayerDateStats(for: cdPlayer)
                 
                 // Creates the player instance
                 let player = Player(from: cdPlayer)
@@ -81,6 +80,51 @@ class CDPlayerRepository: PlayerRepository {
         }
         
         return players
+    }
+    
+    func deletePlayer(withID id: UUID) {
+        // Grab the CDPlayer object
+        guard let cdPlayer = fetchCDPlayer(withID: id) else {
+            print("deletePlayer: No player object to delete")
+            return
+        }
+        
+        // Remove it from CoreData
+        CDPlayer.delete(cdPlayer)
+        
+        // Remove it from the cache
+        cache.remove(id)
+        
+    }
+    
+    func getPlayers() -> [Player] {
+        return cache.getAll()
+    }
+    
+    /// Grab the CDPlayer DTO corresponding to the given UUID
+    /// - Parameter id: The UUID of the Player object
+    /// - Returns: the CDPlayer object
+    private func fetchCDPlayer(withID id: UUID) -> CDPlayer? {
+        
+        let request = CDPlayer.fetchRequest()
+        
+        request.predicate = NSPredicate(format: "uuid == %@", id as CVarArg)
+        
+        do {
+            let cdPlayer = try storageManager.container.viewContext.fetch(request)
+            
+            if cdPlayer.count > 1 {
+                // MARK: Need to add proper error handling
+                print("fetchCDGame: Error there is more than one CDGame with this uuid: \(id)")
+            }
+            
+            return cdPlayer.first
+        } catch {
+            // MARK: Need to add proper error handling
+            print("fetchCDPlayer: Error grabbing the CDGame object \(error)")
+        }
+        
+        return nil
     }
 }
 //

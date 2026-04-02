@@ -69,7 +69,7 @@ extension CDPlayer {
 
         let context = StorageManager.preview.container.viewContext
 
-        let player = CDPlayer(name: VBSConstants.coreDataPlayerName, context: context)
+        let player = CDPlayer(name: VBSConstants.coreDataPlayerName1, context: context)
         
         var stats = [CDPlayerDateStat]()
         

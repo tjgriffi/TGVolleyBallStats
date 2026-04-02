@@ -10,9 +10,16 @@ import Foundation
 @Observable
 class GameHubViewModel {
     
-    var games: [Game]
+    var games = [Game]()
+    private var gameRepository: GameRepository
     
-    init(games: [Game] = [Game.example]) {
-        self.games = games
+    init(gameRepository: GameRepository) {
+        self.gameRepository = gameRepository
+    }
+    
+    func loadGames() {
+        
+        // Grab the values from the repository
+        games = gameRepository.getGames()
     }
 }

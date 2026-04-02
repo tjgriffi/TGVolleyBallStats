@@ -82,7 +82,7 @@ extension CDGame {
             
             rally.stats = [1,2,3,4,5].reduce(into: Set<CDPlayerAndStat>()) { stats, _ in
                 
-                stats.insert(CDPlayerAndStat(playerName: VBSConstants.coreDataPlayerName, stat: Stats.allCases.randomElement()?.rawValue ?? "ace", context: context))
+                stats.insert(CDPlayerAndStat(playerName: VBSConstants.coreDataPlayerName1, stat: Stats.allCases.randomElement()?.rawValue ?? "ace", context: context))
             }
             
             result.insert(rally)

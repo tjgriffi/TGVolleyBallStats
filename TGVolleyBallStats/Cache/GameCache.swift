@@ -37,4 +37,8 @@ class GameCache: BaseCache {
     func clear() {
         cache.removeAll()
     }
+    
+    func getAll() -> [Game] {
+        return Array(cache.values)
+    }
 }

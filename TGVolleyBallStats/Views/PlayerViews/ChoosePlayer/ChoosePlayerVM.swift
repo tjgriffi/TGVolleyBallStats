@@ -21,6 +21,6 @@ class ChoosePlayerVM {
     
     // Fetch the players through the repository
     func getPlayers() {
-//        players = playerRepositry.fetchPlayers()
+        players = playerRepositry.getPlayers()
     }
 }

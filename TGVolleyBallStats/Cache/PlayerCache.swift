@@ -38,4 +38,8 @@ class PlayerCache: BaseCache {
     func remove(_ key: UUID) {
         cache.removeValue(forKey: key)
     }
+    
+    func getAll() -> [Player] {
+        return Array(cache.values)
+    }
 }

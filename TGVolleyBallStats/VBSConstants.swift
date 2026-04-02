@@ -9,5 +9,6 @@ import Foundation
 
 class VBSConstants {
     
-    static var coreDataPlayerName = "CDPlayerName"
+    static var coreDataPlayerName1 = "CDPlayerName1"
+    static var coreDataPlayerName2 = "CDPlayerName2"
 }
