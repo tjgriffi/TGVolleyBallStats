@@ -11,6 +11,21 @@ import SwiftUI
 
 // Keeps track of the data utilized by the different objects
 struct StorageManager {
+    
+    enum StorageManagerError: Error {
+        case saveError(String)
+        case noChanges
+        
+        var errorDescription: String? {
+            switch self {
+            case .saveError(let message):
+                return "Failed to save: \(message)"
+            case .noChanges:
+                return "No changes to save"
+            }
+        }
+    }
+    
     static let shared = StorageManager()
     
     let container: NSPersistentContainer
@@ -31,7 +46,7 @@ struct StorageManager {
     }
     
     // Save changes to the context
-    func save() {
+    func save() async throws {
         
         // Check if the context actually has changes
         let context = container.viewContext
@@ -41,9 +56,10 @@ struct StorageManager {
         do {
             try context.save()
         } catch {
+            #if DEBUG
             print("error saving context: \(error)")
+            #endif
         }
-        
     }
     
     // MARK: Preview

@@ -9,7 +9,7 @@ import Foundation
 import CoreData
 
 protocol GameRepository {
-    func saveGame(_ game: Game)
+    func saveGame(_ game: Game) async throws
     func getGame(with id: UUID) -> Game?
     func deleteGame(withID id: UUID)
     func getGames() -> [Game]
@@ -26,8 +26,8 @@ class CDGameRepository: GameRepository {
         self.storageManager = storageManager
         self.cache = cache
         
-            // Initial setup
-            fetchGames()
+        // Initial setup
+        fetchGames()
     }
     
     private func fetchGames() {
@@ -54,16 +54,28 @@ class CDGameRepository: GameRepository {
         return
     }
     
-    func saveGame(_ game: Game) {
+    func saveGame(_ game: Game) async throws {
         
         // Update the backend
-        let cdGame = CDGame(date: game.date, context: storageManager.container.viewContext)
-        storageManager.save()
-        
-        // Create a game for the local cache
-        let game = Game(from: cdGame)
-        
-        cache.setValue(game)
+        do {
+            let cdGame = CDGame(date: game.date, context: storageManager.container.viewContext)
+            try await storageManager.save()
+            
+            // Create a game for the local cache
+            let game = Game(from: cdGame)
+            
+            cache.setValue(game)
+        } catch let error as StorageManager.StorageManagerError {
+            
+            switch error {
+            case .saveError(let errorString):
+                throw CDRepositoryError.saveFailed(errorString)
+            case .noChanges:
+                throw CDRepositoryError.noChanges
+            }
+        } catch {
+            throw CDRepositoryError.unknownSaveError(error.localizedDescription)
+        }
     }
     
     func getGame(with id: UUID) -> Game? {

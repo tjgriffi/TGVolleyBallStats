@@ -21,14 +21,15 @@ This is a list of Tasks that still need to be completed for the MVP
 11.  Determine how to store the rally information to ensure it stays in the appropriate order when fetched
 +  Could look into using Date().  That would enable me to keep them in the order that they were set up in (that or I could use an integer)
 12.  Look into setting up the trendline for the actual values.  The line seemed off when running the initial tests using a Data Transfer Object
-13.  Setup a repository for getting the game information
-   +  Repository for vSet, Rally, PlayerDateStat
+<!--13.  Setup a repository for getting the game information-->
 14.  Dark mode functionality
 15.  Redo (not just point lost or won)
 16.  Auto tracking rotation
 17.  Better indicator for current rotation
 18.  Guest name
 19.  Save game/player
+<!--    + Save Player-->
+    + Save Game
 20.  Domain model with references
 <!--21.  A central cache/registry that holds the actual data models-->
 <!--   + Player Cache-->

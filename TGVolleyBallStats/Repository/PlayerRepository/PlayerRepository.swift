@@ -9,10 +9,27 @@ import Foundation
 import CoreData
 
 protocol PlayerRepository {
-    func savePlayer(_ name: String)
+    func savePlayer(_ name: String) async throws
     func getPlayers(with ids: [UUID]) -> [Player]
     func deletePlayer(withID id: UUID)
     func getPlayers() -> [Player]
+}
+
+enum CDRepositoryError: LocalizedError {
+    case saveFailed(String)
+    case noChanges
+    case unknownSaveError(String)
+    
+    var errorDescription: String? {
+        switch self {
+        case .saveFailed(let string):
+            return "Error saving the game: \(string)"
+        case .noChanges:
+            return "No changes detected"
+        case .unknownSaveError(let string):
+            return "Unknown error: \(string)"
+        }
+    }
 }
 
 class CDPlayerRepository: PlayerRepository {
@@ -61,16 +78,28 @@ class CDPlayerRepository: PlayerRepository {
         self.cache.clear()
     }
     
-    func savePlayer(_ name: String) {
+    nonisolated func savePlayer(_ name: String) async throws {
         // Update the backend
-        let cdPlayer = CDPlayer(name: name, context: context)
-        storageManager.save()
-        
-        // Create a player object from the saved DTO (to make sure the UUID of the CDPlayer matches the Player)
-        let player = Player(from: cdPlayer)
-        
-        // Update the cache
-        cache.setValue(player)
+        do {
+            let cdPlayer = CDPlayer(name: name, context: context)
+            try await storageManager.save()
+            
+            // Create a player object from the saved DTO (to make sure the UUID of the CDPlayer matches the Player)
+            let player = Player(from: cdPlayer)
+            
+            // Update the cache
+            cache.setValue(player)
+        } catch let error as StorageManager.StorageManagerError {
+            
+            switch error {
+            case .saveError(let errorString):
+                throw CDRepositoryError.saveFailed(errorString)
+            case .noChanges:
+                throw CDRepositoryError.noChanges
+            }
+        } catch {
+            throw CDRepositoryError.unknownSaveError(error.localizedDescription)
+        }
     }
     
     func getPlayers(with ids: [UUID]) -> [Player] {

@@ -11,7 +11,7 @@ import Foundation
 class ChoosePlayerVM {
     
     private(set) var players: [Player]
-    private var playerRepositry: PlayerRepository
+    private(set) var playerRepositry: PlayerRepository
     
     init(players: [Player] = [],
          playerRepository: PlayerRepository) {
