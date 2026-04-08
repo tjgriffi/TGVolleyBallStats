@@ -1,141 +1,23 @@
 //
-//  GameViewModel.swift
+//  GameViewModel 2.swift
 //  TGVolleyBallStats
 //
-//  Created by Terrance Griffith on 8/25/25.
+//  Created by Terrance Griffith on 4/6/26.
 //
 
+
 import Foundation
-
-class VolleyBallSet: Identifiable {
-    private(set) var rallies: [Rally]
-    private(set) var id = UUID()
-    
-    /// Generates a single set
-    static var example: VolleyBallSet {
-        return generateSet()
-    }
-    
-    /// Generates three sets
-    static var examples: [VolleyBallSet] {
-        return (0...2).map { _ in
-            generateSet()
-        }
-    }
-    
-    private static func generateSet() -> VolleyBallSet {
-        var rallies = [Rally]()
-        
-        var homeScore = 0
-        var oppScore = 0
-        
-        var rotation = 0
-        var rallyStart = RallyStart.allCases.randomElement() ?? .receive
-        
-        let players = Player.examples
-        var rallyCount = 0
-        
-        // Go through adding rallies to the list of rallies
-        while (homeScore < 25 && oppScore < 25) {
-            rallyCount += 1
-            
-            var playerStats = [PlayerAndStat]()
-            playerStats.append(PlayerAndStat(id: UUID(), player: players.randomElement()?.name ?? "Jacob", stat: Stats.allCases.randomElement() ?? .pass1))
-            
-            // Case where the rally ends on the first action
-            if !isEndOfRally(stat: playerStats.last!.stat) {
-                let pointGained = pointGained(stat: playerStats.last!.stat)
-                
-                if pointGained > 1 && rallyStart == .receive {
-                    rallyStart = .serve
-                    rotation = rotation > 6 ? 0 : rotation + 1
-                } else if pointGained == 0 && rallyStart == .serve {
-                    rallyStart = .receive
-                    rotation = rotation > 6 ? 0 : rotation + 1
-                }
-                
-                rallies.append(
-                    Rally(
-                        id: UUID(),
-                        rotation: rotation,
-                        rallyStart: rallyStart,
-                        point: pointGained,
-                        stats: playerStats)
-                )
-
-                // Update the scores
-                if pointGained == 0 {
-                    oppScore += 1
-                } else {
-                    homeScore += 1
-                }
-                continue
-            }
-            
-            // Play out the rally
-            while isEndOfRally(stat: playerStats.last!.stat) || playerStats.count < 27 {
-                
-                playerStats.append(PlayerAndStat(id: UUID(), player: players.randomElement()?.name ?? "Jacob", stat: Stats.allCases.randomElement() ?? .hitError))
-            }
-            
-            // Check if points were gained
-            let pointGained = pointGained(stat: playerStats.last!.stat)
-            
-            if pointGained > 1 && rallyStart == .receive {
-                rallyStart = .serve
-                rotation = rotation > 6 ? 0 : rotation + 1
-            } else if pointGained == 0 && rallyStart == .serve {
-                rallyStart = .receive
-                rotation = rotation > 6 ? 0 : rotation + 1
-            }
-            
-            // Update the scores
-            if pointGained == 0 {
-                oppScore += 1
-            } else {
-                homeScore += 1
-            }
-            
-            // Update the list of rallies
-            rallies.append(
-                Rally(
-                    id: UUID(),
-                    rotation: rotation,
-                    rallyStart: rallyStart,
-                    point: pointGained,
-                    stats: playerStats)
-            )
-        }
-        
-        return VolleyBallSet(rallies: rallies)
-        
-    }
-    
-    private static func isEndOfRally(stat: Stats) -> Bool {
-        return stat != .hitError &&
-            stat != .kill &&
-            stat != .killBlock &&
-            stat != .blockError &&
-            stat != .freeBallKill &&
-            stat != .setError &&
-            stat != .setterDump &&
-            stat != .ace
-    }
-    
-    private static func pointGained(stat: Stats) -> Int {
-        return (stat == .kill ||
-                stat == .killBlock ||
-                stat == .freeBallKill ||
-                stat == .setterDump) ? 1 : 0
-    }
-    
-    init(rallies: [Rally]) {
-        self.rallies = rallies
-    }
-}
+import Playgrounds
 
 @Observable
 class GameViewModel {
+    
+    enum GameViewModelState {
+        case gameSavedSuccess
+        case errorSavingGame
+        case initial
+        case saving
+    }
     
     var game: Game
     var setValues: [SetValues] = []
@@ -144,6 +26,14 @@ class GameViewModel {
     var sets: [VSet] = []
     var currentRotation: Int = 1
     private var setCount = 1
+    private var playerRepository: PlayerRepository
+    private(set) var players: [Player] = []
+    private(set) var selectedPlayers: [Player] = []
+    private(set) var newGameAdded: Bool = false
+    
+    private(set) var state: GameViewModelState = .initial
+    
+    private var gameRepository: GameRepository
     
     struct SetValues: Identifiable {
         let id: Int
@@ -169,13 +59,19 @@ class GameViewModel {
     }
     
     // MARK: Rallies is for testing purposes
-    init(game: Game, rallies: [Rally] = []) {
+    init(game: Game,
+         rallies: [Rally] = [],
+         playerRepository: PlayerRepository,
+         gameRepository: GameRepository) {
+        
         self.game = game
         self.setValues = []
         self.rallies = rallies
+        self.playerRepository = playerRepository
+        self.gameRepository = gameRepository
+        players = playerRepository.getPlayers()
         
-        
-        game.sets.forEach { [weak self] set in
+        self.game.sets.forEach { [weak self] set in
             self?.setValues.append(self?.setupStats(for: set, setNumber: self?.setCount ?? 1) ?? SetValues.init(
             id: 0, kills: 0, digs: 0, aces: 0, passes: 0, spikes: 0, freeBall: 0, killBlocks: 0, freeballKills: 0, touches: 0, blocks: 0, hittingErrors: 0, blockingErrors: 0, settingErrors: 0, freeBallErrors: 0, shanks: 0, serveErrors: 0, rallySore: .init(home: 0, away: 0), bestRotation: (0,0), worstRotation: (0,0)
         )
@@ -184,16 +80,48 @@ class GameViewModel {
         }
     }
     
+    func initialSetup() {
+        // Get the players for the given playerIDs
+    }
+    
     static var preview: GameViewModel {
-        GameViewModel(game: .example)
+        GameViewModel(
+            game: .example,
+            playerRepository: CDPlayerRepository(
+                context: StorageManager.preview.container.viewContext,
+                cache: PlayerCache(),
+                storageManager: .preview),
+            gameRepository: CDGameRepository(
+                storageManager: .preview,
+                cache: GameCache())
+        )
     }
     
     static var previewNoSets: GameViewModel {
-        GameViewModel(game: .noSets)
+        GameViewModel(
+            game: .noSets,
+            playerRepository: CDPlayerRepository(
+                context: StorageManager.preview.container.viewContext,
+                cache: PlayerCache(),
+                storageManager: .preview),
+                gameRepository: CDGameRepository(
+                    storageManager: .preview,
+                    cache: GameCache())
+            )
     }
     
     static var previewNoSetsFullRally: GameViewModel {
-        GameViewModel(game: .noSets, rallies: Rally.examples)
+        GameViewModel(
+            game: .noSets,
+            rallies: Rally.examples,
+            playerRepository: CDPlayerRepository(
+                context: StorageManager.preview.container.viewContext,
+                cache: PlayerCache(),
+                storageManager: .preview),
+            gameRepository: CDGameRepository(
+                storageManager: .preview,
+                cache: GameCache())
+        )
     }
     
     private func setupStats(for set: VSet, setNumber: Int) -> SetValues {
@@ -347,11 +275,11 @@ class GameViewModel {
 
     func doneCreatingSetClicked() {
         // Add the set to the list of sets for our game object
-        //TODO: Need to fix this before testing out parts of the app
-//        let set = VSet(players: game.players, rallies: rallies)
-//        game.sets.append(set)
-//        
-//        self.setValues.append(setupStats(for: set, setNumber: setCount))
+
+        let set = VSet(id: UUID(), rallies: rallies)
+        game.sets.append(set)
+        
+        self.setValues.append(setupStats(for: set, setNumber: setCount))
         setCount += 1
         
         // Reset all of the other values
@@ -372,10 +300,34 @@ class GameViewModel {
         
         rallies.append(rally)
     }
-}
+    
+    
+    // Tell the Game Repository to save the game that has currently been worked on
+    func doneCreatingGame() async {
 
-import Playgrounds
-
-#Playground {
-    let gameVewModel = GameViewModel(game: Game.example)
+        // Base case check to make sure at least one set has been created in the Game
+        guard game.sets.count > 0, state != .saving else{
+            // Need at least 1 set for a game
+            return
+        }
+        
+        await MainActor.run {
+            self.state = .saving
+        }
+        
+        do {
+            
+            try await gameRepository.saveGame(game)
+            
+            await MainActor.run {
+                self.state = .gameSavedSuccess
+            }
+        } catch {
+            // TODO: Add appropriate error handling
+            await MainActor.run {
+                self.state = .errorSavingGame
+            }
+            print("Error: \(error)")
+        }
+    }
 }

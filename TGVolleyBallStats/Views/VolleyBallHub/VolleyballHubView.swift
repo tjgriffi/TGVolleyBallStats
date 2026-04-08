@@ -14,6 +14,7 @@ struct VolleyballHubView: View {
     @Environment(\.storageManager) var storageManager
     
     @Environment(\.managedObjectContext) var context
+    var volleyBallHubVM: VolleyBallHubVM
     
     var body: some View {
         TabView {
@@ -21,14 +22,17 @@ struct VolleyballHubView: View {
                 NavigationStack {
                     GameHubView(
                         gameHubViewModel: GameHubViewModel(
-                            gameRepository: CDGameRepository(
-                                storageManager: storageManager))
+                            gameRepository: volleyBallHubVM.gameRepository,
+                            playerRepository: volleyBallHubVM.playerRepository)
                     )
                 }
             }
             Tab("Player", systemImage: "figure.volleyball") {
                 NavigationStack{
-                    ChoosePlayerView(choosePlayerVM: ChoosePlayerVM(playerRepository: CDPlayerRepository(context: context)))
+                    ChoosePlayerView(
+                        choosePlayerVM: ChoosePlayerVM(
+                            playerRepository: volleyBallHubVM.playerRepository)
+                    )
                 }
             }
         }
@@ -36,7 +40,16 @@ struct VolleyballHubView: View {
 }
 
 #Preview {
-    VolleyballHubView()
+    VolleyballHubView(
+        volleyBallHubVM: VolleyBallHubVM(
+            playerRepository: CDPlayerRepository(
+                context: StorageManager.preview.container.viewContext,
+                cache: PlayerCache(),
+                storageManager: StorageManager.preview),
+            gameRepository: CDGameRepository(
+                storageManager: .preview,
+                cache: GameCache()))
+    )
         .environment(\.managedObjectContext, StorageManager.preview.container.viewContext)
         .environment(\.storageManager, StorageManager.preview)
 }

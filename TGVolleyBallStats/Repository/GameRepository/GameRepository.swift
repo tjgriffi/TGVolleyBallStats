@@ -57,8 +57,40 @@ class CDGameRepository: GameRepository {
     func saveGame(_ game: Game) async throws {
         
         // Update the backend
+        let context = storageManager.container.viewContext
         do {
-            let cdGame = CDGame(date: game.date, context: storageManager.container.viewContext)
+            
+            // Save the game
+            let cdGame = CDGame(date: game.date, context: context)
+            
+            // Save the game's sets
+            let cdVSets = game.sets.map { set in
+                var cdVSet = CDVSet(context: context)
+                
+                // Save the set's rallies
+                let cdRallies = set.rallies.map { rally in
+                    
+                    var cdRally = CDRally(pointGained: rally.point == 1, rallyStart: rally.rallyStart == .serve, rotation: Int16(rally.rotation), context: context)
+                    
+                    // Save the rally's player name and stats
+                    let cdPlayerStats = rally.stats.map { playerAndStat in
+                        
+                        CDPlayerAndStat(playerName: playerAndStat.player, stat: playerAndStat.stat.rawValue, context: context)
+                    }
+                    
+                    cdRally.stats.formUnion(cdPlayerStats)
+                    
+                    return cdRally
+                }
+                
+                cdVSet.rallies.formUnion(cdRallies)
+                
+                return cdVSet
+            }
+            
+            cdGame.sets.formUnion(cdVSets)
+            
+            
             try await storageManager.save()
             
             // Create a game for the local cache
@@ -133,9 +165,18 @@ class CDGameRepository: GameRepository {
 //import Playgrounds
 //
 //#Playground {
-//    let cache = GameCache()
+//    var cache = GameCache()
 //    let storageManager = StorageManager.preview
-//    let gameRepository = CDGameRepository(context: storageManager.container.viewContext, cache: cache)
+//    let gameRepository = CDGameRepository(
+//        storageManager: storageManager,
+//        cache: cache)
 //    
-//    gameRepository.fetchGames()
+//    let gameToBeSaved = Game.example
+//    do {
+//        try await gameRepository.saveGame(gameToBeSaved)
+//
+//       let games = gameRepository.getGames()
+//    } catch {
+//        print("Error saving games: \(error)")
+//    }
 //}

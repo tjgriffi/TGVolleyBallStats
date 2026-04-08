@@ -46,7 +46,7 @@ struct Game: Identifiable, Equatable {
             id: UUID(),
             date: Date(),
             players: playerIDs,
-            sets: []/*(1...3).map { _ in VSet.generateSet(withPlayers: players) }*/
+            sets: (1...3).map { _ in VSet.generateSet(withPlayers: Player.examples) }
         )
     }
     
@@ -65,19 +65,19 @@ struct Game: Identifiable, Equatable {
 // MARK: We also may need to make this a class
 struct VSet: Identifiable {
     let id: UUID
-    let players: [Player] //TODO: Remove players
+//    let players: [Player] //TODO: Remove players
     let rallies: [Rally]
     
-    init(id: UUID, players: [Player], rallies: [Rally]) {
+    init(id: UUID, /*players: [Player],*/ rallies: [Rally]) {
         self.id = id
-        self.players = players
+//        self.players = players
         self.rallies = rallies
     }
     
     init(from cdVSet: CDVSet) {
         
         self.id = cdVSet.uuid
-        self.players = []
+//        self.players = []
         
         self.rallies = cdVSet.rallies.map({ cdRally in
             Rally(from: cdRally)
@@ -89,7 +89,7 @@ struct VSet: Identifiable {
         let players = Player.examples
         
         return VSet(
-            id: UUID(), players: players,
+            id: UUID(), /*players: players,*/
             rallies: players.map { player in
                 Rally.generateExampleRally(forPlayer: player.name)
             }
@@ -99,7 +99,7 @@ struct VSet: Identifiable {
     static func generateSet(withPlayers players: [Player]) -> VSet {
         
         VSet(
-            id: UUID(), players: players,
+            id: UUID(), /*players: players,*/
             rallies: players.map { player in
                 Rally.generateExampleRally(forPlayer: player.name)
             }

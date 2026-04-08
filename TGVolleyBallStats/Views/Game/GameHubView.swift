@@ -9,13 +9,18 @@ import SwiftUI
 
 struct GameHubView: View {
     @State var gameHubViewModel: GameHubViewModel
+    @State var newGamedAdded: Bool = false
     
     var body: some View {
         ZStack(alignment: .bottom) {
             List {
                 ForEach(gameHubViewModel.games) { game in
                     NavigationLink {
-                        GameView(gameViewModel: GameViewModel(game: game))
+                        GameView(
+                            gameViewModel: GameViewModel(
+                                game: game,
+                                playerRepository: gameHubViewModel.playerRepository,
+                                gameRepository: gameHubViewModel.gameRepository))
                     } label: {
                         GameHubListCell(game: game)
                     }
@@ -25,24 +30,50 @@ struct GameHubView: View {
                 NavigationLink {
                     // TODO: Need to evaluate if we want to pass in the gameviewmodel or gamehubviewmodel and then determine how we will pass the game value around
                     // TODO: Need to determine when the creation/addition of players commences
-                    AddGameView(gameViewModel: GameViewModel(game: Game(id: UUID(), date: Date(), players: [], sets: [])))
+                    AddGameView(
+                        gameViewModel: GameViewModel(
+                            game: Game(
+                                id: UUID(),
+                                date: Date(),
+                                players: [],
+                                sets: []),
+                            playerRepository: gameHubViewModel.playerRepository,
+                            gameRepository: gameHubViewModel.gameRepository),
+                        newGameAdded: $newGamedAdded)
                 } label: {
 //                        AddGameListView()
                     Image(systemName: "plus.circle.fill")
                         .foregroundStyle(.blue)
                 }
+//                .disabled(gameHubViewModel.enableAddGameButton)
             }
         }
         .navigationTitle("Games")
         .task {
             gameHubViewModel.loadGames()
         }
+        .onChange(of: newGamedAdded) { oldValue, newValue in
+            if newValue == true {
+                Task {
+                    gameHubViewModel.loadGames()
+                }
+            }
+            
+            newGamedAdded = false
+        }
     }
 }
 
 #Preview("GameHubView") {
     NavigationStack {
-        GameHubView(gameHubViewModel: GameHubViewModel(gameRepository: CDGameRepository(storageManager: StorageManager.preview, cache: GameCache())))
+        GameHubView(
+            gameHubViewModel: GameHubViewModel(
+                gameRepository: CDGameRepository(
+                    storageManager: StorageManager.preview, cache: GameCache()),
+                playerRepository: CDPlayerRepository(
+                    context: StorageManager.preview.container.viewContext,
+                    cache: PlayerCache(),
+                    storageManager: .preview)))
     }
 }
 

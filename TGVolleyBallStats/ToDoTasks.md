@@ -36,3 +36,4 @@ This is a list of Tasks that still need to be completed for the MVP
 <!--   + Game Cache-->
 <!--22.  Repository just looks at the caches-->
 23.  Model the UI for setting up the Rally (PlayerAndStat) off of the UI for setting up a new event in the iOS calendar
+24.  Function for initiating another fetch of the data from the backend (CoreData) (PlayerRepository, GameRepository)
