@@ -59,11 +59,14 @@ struct StorageManager {
             #if DEBUG
             print("error saving context: \(error)")
             #endif
+            
+            throw StorageManagerError.saveError(error.localizedDescription)
         }
     }
     
     // MARK: Preview
-    static var preview: StorageManager {
+    static let preview: StorageManager = {
+
         let storageManager = StorageManager(inMemory: true)
         
         let context = storageManager.container.viewContext
@@ -149,7 +152,7 @@ struct StorageManager {
         game1.players = Set([player1])
                 
         return storageManager
-    }
+    }()
 }
 
 private struct StorageManagerKey: EnvironmentKey {

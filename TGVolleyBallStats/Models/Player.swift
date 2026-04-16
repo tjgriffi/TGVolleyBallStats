@@ -18,6 +18,7 @@ class Player: Identifiable, Hashable {
     
     let id: UUID
     let name: String
+    var isSelected: Bool = false // Used for choosing players in the add game screen
     
     static var example: Player {
         let player = Player(name: "Player 1")

@@ -66,12 +66,14 @@ struct AddRallyView: View {
         }
         .sheet(isPresented: $showAddRallySheet) {
             // Update the values on dismissal of the sheet
-            self.selectedName = nil
-            self.selectedStat = nil
+//            self.selectedName = nil
+//            self.selectedStat = nil
         } content: {
             if let name = selectedName, let stat = selectedStat {
                 AddRallySheet(
-                    playerNames: gameViewModel.game.playerIDs.map { $0.uuidString /*MARK: Need to address this issue (uuid is not a name) */ },
+                    playerNames: gameViewModel.getSelectedPlayers().map({ player in
+                        player.name
+                    }),
                     selectedName: name,
                     selectedStat: stat,
                     entries: $entries, indexToEdit: entries.firstIndex(where: { entry in
@@ -80,7 +82,9 @@ struct AddRallyView: View {
                 )
             } else {
                 AddRallySheet(
-                    playerNames: gameViewModel.game.playerIDs.map { $0.uuidString /*MARK: Need to address this issue (uuid is not a name) */ },
+                    playerNames: gameViewModel.getSelectedPlayers().map({ player in
+                        player.name
+                    }),
                     entries: $entries
                 )
             }

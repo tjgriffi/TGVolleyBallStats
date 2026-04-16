@@ -65,12 +65,12 @@ class CDGameRepository: GameRepository {
             
             // Save the game's sets
             let cdVSets = game.sets.map { set in
-                var cdVSet = CDVSet(context: context)
+                let cdVSet = CDVSet(context: context)
                 
                 // Save the set's rallies
                 let cdRallies = set.rallies.map { rally in
                     
-                    var cdRally = CDRally(pointGained: rally.point == 1, rallyStart: rally.rallyStart == .serve, rotation: Int16(rally.rotation), context: context)
+                    let cdRally = CDRally(pointGained: rally.point == 1, rallyStart: rally.rallyStart == .serve, rotation: Int16(rally.rotation), context: context)
                     
                     // Save the rally's player name and stats
                     let cdPlayerStats = rally.stats.map { playerAndStat in

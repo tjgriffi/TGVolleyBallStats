@@ -138,13 +138,13 @@ class VolleyBallSet: Identifiable {
 
 import Playgrounds
 
-#Playground {
-    let gameVewModel = GameViewModel(
-        game: Game.example, playerRepository: CDPlayerRepository(
-            context: StorageManager.preview.container.viewContext,
-            cache: PlayerCache(),
-            storageManager: .preview),
-             gameRepository: CDGameRepository(
-                storageManager: .preview,
-                cache: GameCache()))
-}
+//#Playground {
+//    let gameVewModel = GameViewModel(
+//        game: Game.example, playerRepository: CDPlayerRepository(
+//            context: StorageManager.preview.container.viewContext,
+//            cache: PlayerCache(),
+//            storageManager: .preview),
+//             gameRepository: CDGameRepository(
+//                storageManager: .preview,
+//                cache: GameCache()))
+//}

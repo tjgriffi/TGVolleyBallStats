@@ -23,13 +23,29 @@ class GameViewModel {
     var setValues: [SetValues] = []
     var statsForCurrentRally: [PlayerAndStat] = []
     var rallies: [Rally] = []
-    var sets: [VSet] = []
+    var vSet: [VSet] = []
     var currentRotation: Int = 1
     private var setCount = 1
     private var playerRepository: PlayerRepository
     private(set) var players: [Player] = []
-    private(set) var selectedPlayers: [Player] = []
+    private(set) var selectedPlayers = Set<UUID>()
     private(set) var newGameAdded: Bool = false
+    var hasSelectedPlayers: Bool { !selectedPlayers.isEmpty }
+    private var gameSaved: Bool = false
+    private var playersSaved: Bool = false
+    
+    func toggleSelectedPlayers(player: Player) {
+        if selectedPlayers.contains(player.id) {
+            selectedPlayers.remove(player.id)
+        } else {
+            selectedPlayers.insert(player.id)
+        }
+    }
+    
+    func getSelectedPlayers() -> [Player] {
+        return playerRepository.getPlayers(with: Array(selectedPlayers))
+    }
+    
     
     private(set) var state: GameViewModelState = .initial
     
@@ -84,9 +100,9 @@ class GameViewModel {
         // Get the players for the given playerIDs
     }
     
-    static var preview: GameViewModel {
+    static var preview: GameViewModel = {
         GameViewModel(
-            game: .example,
+            game: .emptyExample,
             playerRepository: CDPlayerRepository(
                 context: StorageManager.preview.container.viewContext,
                 cache: PlayerCache(),
@@ -95,9 +111,9 @@ class GameViewModel {
                 storageManager: .preview,
                 cache: GameCache())
         )
-    }
+    }()
     
-    static var previewNoSets: GameViewModel {
+    static var previewNoSets: GameViewModel = {
         GameViewModel(
             game: .noSets,
             playerRepository: CDPlayerRepository(
@@ -108,9 +124,9 @@ class GameViewModel {
                     storageManager: .preview,
                     cache: GameCache())
             )
-    }
+    }()
     
-    static var previewNoSetsFullRally: GameViewModel {
+    static var previewNoSetsFullRally: GameViewModel = {
         GameViewModel(
             game: .noSets,
             rallies: Rally.examples,
@@ -122,7 +138,7 @@ class GameViewModel {
                 storageManager: .preview,
                 cache: GameCache())
         )
-    }
+    }()
     
     private func setupStats(for set: VSet, setNumber: Int) -> SetValues {
         
@@ -276,10 +292,10 @@ class GameViewModel {
     func doneCreatingSetClicked() {
         // Add the set to the list of sets for our game object
 
-        let set = VSet(id: UUID(), rallies: rallies)
-        game.sets.append(set)
+        let vSet = VSet.generateSet(withPlayers: players) /*VSet(id: UUID(), rallies: rallies)*/
+        game.sets.append(vSet)
         
-        self.setValues.append(setupStats(for: set, setNumber: setCount))
+        self.setValues.append(setupStats(for: vSet, setNumber: setCount))
         setCount += 1
         
         // Reset all of the other values
@@ -317,7 +333,17 @@ class GameViewModel {
         
         do {
             
-            try await gameRepository.saveGame(game)
+            // Update the game
+            if !gameSaved {
+                try await gameRepository.saveGame(game)
+                gameSaved = true
+            }
+            
+            // Update each of the selected players information
+            if !playersSaved {
+                try await updatePlayers(playerRepository.getPlayers(with: Array(selectedPlayers)))
+                playersSaved = true
+            }
             
             await MainActor.run {
                 self.state = .gameSavedSuccess
@@ -330,4 +356,73 @@ class GameViewModel {
             print("Error: \(error)")
         }
     }
+    
+    private func updatePlayers(_ players: [Player]) async throws {
+        
+
+        for player in players {
+            let stats = getStatsForPlayer(playerName: player.name)
+            player.addNewGameStats(stats: stats, date: game.date)
+            
+            try await playerRepository.updatePlayer(with: player)
+        }
+    }
+    
+    private func getStatsForPlayer(playerName: String) -> [Stats] {
+        
+        var stats = [Stats]()
+        game.sets.forEach { vSet in
+            
+            vSet.rallies.forEach { rally in
+                
+                rally.stats.forEach {
+                    
+                    if $0.player == playerName {
+                        stats.append( $0.stat )
+                    }
+                }
+            }
+        }
+        
+        return stats
+    }
+    
+    func resetState() {
+        guard state != .saving else { return }
+        
+        state = .initial
+    }
 }
+
+//#Playground("Save Game and Player") {
+//    let playerRepository = CDPlayerRepository(
+//        context: StorageManager.preview.container.viewContext,
+//        cache: PlayerCache(),
+//        storageManager: .preview)
+//    let gameViewModel = GameViewModel(
+//        game: Game(
+//            id: UUID(),
+//            date: Date(),
+//            players: [],
+//            sets: []),
+//        playerRepository: playerRepository,
+//        gameRepository:
+//            CDGameRepository(
+//                storageManager: StorageManager.preview,
+//                cache: GameCache()))
+//    
+//    gameViewModel.players.forEach { player in
+//        gameViewModel.toggleSelectedPlayers(player: player)
+//    }
+//
+//    // Generate 3 sets
+//    gameViewModel.doneCreatingSetClicked()
+//    gameViewModel.doneCreatingSetClicked()
+//    gameViewModel.doneCreatingSetClicked()
+//    
+//    // Save the game
+//    await gameViewModel.doneCreatingGame()
+//    
+//    // Grab the players to see if they're updated
+//    let players = playerRepository.getPlayers()
+//}

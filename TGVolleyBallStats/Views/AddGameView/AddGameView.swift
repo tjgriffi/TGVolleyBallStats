@@ -14,23 +14,38 @@ struct AddGameView: View {
     let gameViewModel: GameViewModel
     @State var playerName: String = ""
     @Binding var newGameAdded: Bool
-    @State var selectedPlayers = [Player]()
+    @State var selectedPlayers = [UUID]()
     @State var isPlayersSectionExpanded: Bool = true
-    @State var isGameSectionExpanded: Bool = true
+    @State var isSetSectionExpanded: Bool = true
+    
+    private var showSaveAlert: Binding<Bool> {
+        
+        Binding (
+            get: { return gameViewModel.state == .errorSavingGame },
+            set: { if !$0 { gameViewModel.resetState() } }
+        )
+    }
     
     var body: some View {
         ZStack {
             VStack {
+
                 List {
                     Section("Players", isExpanded: $isPlayersSectionExpanded) {
                         ForEach(gameViewModel.players) { player in
-                            SelectPlayerRow(playerName: player.name)
+                            SelectPlayerRow(
+                                isSelected: gameViewModel.selectedPlayers.contains(player.id),
+                                player: player)
+                            .onTapGesture {
+                                gameViewModel.toggleSelectedPlayers(player: player)
+                            }
                         }
                     }
                     .onTapGesture {
                         isPlayersSectionExpanded.toggle()
                     }
-                    Section("Games", isExpanded: $isGameSectionExpanded) {
+                    
+                    Section("Sets", isExpanded: $isSetSectionExpanded) {
                         ForEach(gameViewModel.setValues) { set in
                             Section {
                                 Text("Set \(set.id)")
@@ -38,6 +53,9 @@ struct AddGameView: View {
                                 SimpleSetView(set: set)
                             }
                         }
+                    }
+                    .onTapGesture {
+                        isSetSectionExpanded.toggle()
                     }
                 }
                 TextField("Player name goes here", text: $playerName)
@@ -51,7 +69,7 @@ struct AddGameView: View {
                 } label: {
                     Rectangle()
                         .overlay {
-                            Text("Add Game")
+                            Text("Save Game")
                                 .font(.title2)
                                 .foregroundStyle(.white)
                         }
@@ -72,9 +90,14 @@ struct AddGameView: View {
                         .frame(width: 200,height: 50)
                         .cornerRadius(20)
                         .foregroundStyle(.blue)
-                        .opacity(gameViewModel.game.playerIDs.isEmpty ? 0.5 : 1)
+                        .opacity(!gameViewModel.hasSelectedPlayers ? 0.5 : 1)
                 }
-                .disabled(gameViewModel.game.playerIDs.isEmpty)
+                .disabled(!gameViewModel.hasSelectedPlayers)
+            }
+            .alert("Something went wrong saving the game.  Please try again", isPresented: showSaveAlert ) {
+                Button("Confirm") {
+                    gameViewModel.resetState()
+                }
             }
             
             if gameViewModel.state == .gameSavedSuccess {
@@ -105,11 +128,24 @@ struct AddGameView: View {
         }
 
     }
+    
+    struct SelectPlayerRow: View {
+        let isSelected: Bool
+        let player: Player
+        
+        var body: some View {
+            HStack {
+                Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
+                
+                Text(player.name)
+            }
+        }
+    }
 }
 
 #Preview("Add game view") {
     NavigationStack {
-        AddGameView(gameViewModel: GameViewModel.previewNoSets, newGameAdded: .constant(false))
+        AddGameView(gameViewModel: GameViewModel.preview, newGameAdded: .constant(false))
     }
 }
 
@@ -124,19 +160,3 @@ struct AddGameView: View {
 //        AddGameView(gameViewModel: .preview, newGameAdded: .constant(false))
 //    }
 //}
-
-struct SelectPlayerRow: View {
-    @State var isSelected: Bool = false
-    var playerName: String
-    
-    var body: some View {
-        HStack {
-            Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
-                .onTapGesture {
-                    isSelected.toggle()
-                }
-            
-            Text(playerName)
-        }
-    }
-}

@@ -11,14 +11,18 @@ import CoreData
 protocol PlayerRepository {
     func savePlayer(_ name: String) async throws
     func getPlayers(with ids: [UUID]) -> [Player]
-    func deletePlayer(withID id: UUID)
+    func deletePlayer(withID id: UUID) throws
     func getPlayers() -> [Player]
+    func updatePlayer(with player: Player) async throws
+    // TODO: Add function to initiate another fetch from the database
 }
 
 enum CDRepositoryError: LocalizedError {
     case saveFailed(String)
     case noChanges
     case unknownSaveError(String)
+    case issueGrabbingUser
+    case unknownDeleteError(String)
     
     var errorDescription: String? {
         switch self {
@@ -26,8 +30,10 @@ enum CDRepositoryError: LocalizedError {
             return "Error saving the game: \(string)"
         case .noChanges:
             return "No changes detected"
-        case .unknownSaveError(let string):
+        case .unknownSaveError(let string), .unknownDeleteError(let string):
             return "Unknown error: \(string)"
+        case .issueGrabbingUser:
+            return "There was an issue fetching the CDPlayer"
         }
     }
 }
@@ -51,6 +57,7 @@ class CDPlayerRepository: PlayerRepository {
         // Initial setup
         fetchPlayers()
     }
+    
     
     private func fetchPlayers() {
 
@@ -111,18 +118,22 @@ class CDPlayerRepository: PlayerRepository {
         return players
     }
     
-    func deletePlayer(withID id: UUID) {
+    func deletePlayer(withID id: UUID) throws {
+        
         // Grab the CDPlayer object
-        guard let cdPlayer = fetchCDPlayer(withID: id) else {
-            print("deletePlayer: No player object to delete")
-            return
+        do {
+            let cdPlayer = try fetchCDPlayer(withID: id)
+            
+            // Remove it from CoreData
+            CDPlayer.delete(cdPlayer)
+            
+            // Remove it from the cache
+            cache.remove(id)
+        } catch let error as CDRepositoryError {
+            throw error
+        } catch {
+            throw CDRepositoryError.unknownDeleteError(error.localizedDescription)
         }
-        
-        // Remove it from CoreData
-        CDPlayer.delete(cdPlayer)
-        
-        // Remove it from the cache
-        cache.remove(id)
         
     }
     
@@ -133,34 +144,83 @@ class CDPlayerRepository: PlayerRepository {
     /// Grab the CDPlayer DTO corresponding to the given UUID
     /// - Parameter id: The UUID of the Player object
     /// - Returns: the CDPlayer object
-    private func fetchCDPlayer(withID id: UUID) -> CDPlayer? {
+    private func fetchCDPlayer(withID id: UUID) throws -> CDPlayer {
         
         let request = CDPlayer.fetchRequest()
         
-        request.predicate = NSPredicate(format: "uuid == %@", id as CVarArg)
+        request.predicate = NSPredicate(format: "uuid_ == %@", id as CVarArg)
         
         do {
-            let cdPlayer = try storageManager.container.viewContext.fetch(request)
+            let cdPlayerFetchResult = try context.fetch(request)
             
-            if cdPlayer.count > 1 {
-                // MARK: Need to add proper error handling
-                print("fetchCDGame: Error there is more than one CDGame with this uuid: \(id)")
+            guard let cdPlayer = cdPlayerFetchResult.first else {
+                
+                throw CDRepositoryError.issueGrabbingUser
             }
             
-            return cdPlayer.first
+            return cdPlayer
         } catch {
-            // MARK: Need to add proper error handling
-            print("fetchCDPlayer: Error grabbing the CDGame object \(error)")
+            throw CDRepositoryError.issueGrabbingUser
         }
+    }
+    
+    
+    func updatePlayer(with player: Player) async throws {
         
-        return nil
+        do {
+            // Fetch the cdPlayer object from the backend using the uuid
+            let cdPlayer = try fetchCDPlayer(withID: player.id)
+            
+            // Update the values of the cdPlayer with the values in the given player
+            cdPlayer.name = player.name
+            
+            var last10GameStatsSet = Set<CDPlayerDateStat>()
+            player.last10GameStats.forEach { playerDateStat in
+                last10GameStatsSet.insert(
+                    CDPlayerDateStat(
+                        date: playerDateStat.date,
+                        digRating: playerDateStat.digRating,
+                        passRating: playerDateStat.passRating,
+                        killPercentage: playerDateStat.killPercentage,
+                        freeBallRating: playerDateStat.freeBallRating,
+                        pointScore: playerDateStat.pointScore,
+                        context: context))
+            }
+            
+            cdPlayer.playerDateStats = last10GameStatsSet
+            
+            // Save the updates to the Player
+            try await storageManager.save()
+
+        } catch let error as StorageManager.StorageManagerError {
+            throw CDRepositoryError.saveFailed(error.localizedDescription)
+        } catch let error as CDRepositoryError {
+            throw error
+        } catch {
+            throw CDRepositoryError.unknownSaveError(error.localizedDescription)
+        }
     }
 }
-//
+
 //import Playgrounds
-//
-//#Playground {
+
+//#Playground("Update Player") {
 //    let cache = PlayerCache()
 //    let storageManager = StorageManager.preview
 //    let playerRepository = CDPlayerRepository(context: storageManager.container.viewContext, cache: cache)
+//    
+//    let players = playerRepository.getPlayers()
+//    
+//    var player = players.first!
+//    
+//    player.addNewGameStats(stats: Stats.examples, date: Date())
+//    let initialPlayer = playerRepository.getPlayers(with: [player.id]).first
+//            
+//    do {
+//        try await playerRepository.updatePlayer(with: player)
+//
+//        let updatedPlayer = playerRepository.getPlayers(with: [player.id]).first
+//    } catch {
+//        print(error.localizedDescription)
+//    }
 //}

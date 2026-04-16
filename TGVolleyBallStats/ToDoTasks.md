@@ -27,9 +27,9 @@ This is a list of Tasks that still need to be completed for the MVP
 16.  Auto tracking rotation
 17.  Better indicator for current rotation
 18.  Guest name
-19.  Save game/player
+<!--19.  Save game/player-->
 <!--    + Save Player-->
-    + Save Game
+<!--    + Save Game-->
 20.  Domain model with references
 <!--21.  A central cache/registry that holds the actual data models-->
 <!--   + Player Cache-->
@@ -37,3 +37,15 @@ This is a list of Tasks that still need to be completed for the MVP
 <!--22.  Repository just looks at the caches-->
 23.  Model the UI for setting up the Rally (PlayerAndStat) off of the UI for setting up a new event in the iOS calendar
 24.  Function for initiating another fetch of the data from the backend (CoreData) (PlayerRepository, GameRepository)
+<!--25.  Finish the create game flow-->
+<!--    +  Save Game-->
+<!--    +  Save Set-->
+<!--    +  Save Rally-->
+26.  Look into removing static singleton's from Previews and recreating the ".preview" in real time.  That way Database persistence doesn't persist across runs
+27. Test out CoreData saving a game in the manual tests
+28. Update the player's data after a game has been saved
+29.  Update the CDRepositories to make their requests on background threads (Not needed but helps with stability and future proofing)
+30.  Investigate adding a SwiftData Repository/Backend as well
+31.  Add error handling for initial fetching for GameRepository and PlayerRepository
+    + Need to account for issues when the player repository fails to update a specific player
+    

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Game: Identifiable, Equatable {
+class Game: Identifiable, Equatable {
     static func == (lhs: Game, rhs: Game) -> Bool {
         return lhs.id == rhs.id
     }
@@ -39,7 +39,7 @@ struct Game: Identifiable, Equatable {
     }
     
     // TODO: Need to fix the examples now that we're using IDs
-    static var example: Game {
+    static var example: Game = {
         let playerIDs = Player.examples.map { $0.id }
         
         return Game(
@@ -48,9 +48,9 @@ struct Game: Identifiable, Equatable {
             players: playerIDs,
             sets: (1...3).map { _ in VSet.generateSet(withPlayers: Player.examples) }
         )
-    }
+    }()
     
-    static var noSets: Game {
+    static var noSets: Game = {
         let playerIDs = Player.examples.map { $0.id }
         
         return Game(
@@ -58,7 +58,11 @@ struct Game: Identifiable, Equatable {
             date: Date(),
             players: playerIDs, sets: []
         )
-    }
+    }()
+    
+    static var emptyExample: Game = {
+       Game(id: UUID(), date: Date(), players: [], sets: [])
+    }()
 }
 
 // TODO: Revisit if Set needs a list of players for production or if it's just needed for testing
@@ -84,7 +88,7 @@ struct VSet: Identifiable {
         })
     }
     
-    static var example: VSet {
+    static var example: VSet = {
         
         let players = Player.examples
         
@@ -94,7 +98,7 @@ struct VSet: Identifiable {
                 Rally.generateExampleRally(forPlayer: player.name)
             }
         )
-    }
+    }()
     
     static func generateSet(withPlayers players: [Player]) -> VSet {
         

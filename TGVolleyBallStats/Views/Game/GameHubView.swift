@@ -39,6 +39,7 @@ struct GameHubView: View {
                                 sets: []),
                             playerRepository: gameHubViewModel.playerRepository,
                             gameRepository: gameHubViewModel.gameRepository),
+//                        gameViewModel: .previewNoSetsFullRally,
                         newGameAdded: $newGamedAdded)
                 } label: {
 //                        AddGameListView()

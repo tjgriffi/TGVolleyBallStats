@@ -28,6 +28,6 @@ class GameHubViewModel {
     func loadGames() {
         
         // Grab the values from the repository
-        games = gameRepository.getGames()
+        games = gameRepository.getGames()        
     }
 }

@@ -118,6 +118,6 @@ enum RallyStart: String, CaseIterable, Identifiable {
 }
 
 
-#Preview {
+//#Preview {
 //    RallyView(playerName: <#String#>, names: <#[String]#>, onCompletion: <#(Rally) -> Void#>)
-}
+//}
