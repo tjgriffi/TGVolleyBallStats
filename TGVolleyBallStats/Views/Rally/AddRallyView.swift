@@ -24,45 +24,53 @@ struct AddRallyView: View {
 
     var body: some View {
         VStack {
-            RallyContextBarView(rotation: $rotation, startedServe: $rallyStart, pointWon: $pointGained)
             
-            RotationPickerView(rotation: $rotation)
-            
-            Button {
-                showAddRallySheet = true
-            } label: {
-                Text("Add Statistic")
-            }
+            StatisticView(rotation: $rotation, rallyStart: $rallyStart, pointGained: $pointGained)
             
             List {
-                ForEach(entries) { entry in
-                    StatRow(playerStat: entry)
-                        .swipeActions {
-                            Button(role: .destructive) {
-                                entries.removeAll { $0.id == entry.id }
-                            } label: {
-                                Label("Delete", systemImage: "trash")
+                Section("Rally Statistics") {
+                    ForEach(entries) { entry in
+                        StatRow(playerStat: entry)
+                            .swipeActions {
+                                Button(role: .destructive) {
+                                    entries.removeAll { $0.id == entry.id }
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
                             }
-                        }
-                        .onTapGesture {
-                            selectedName = entry.player
-                            selectedStat = entry.stat
-                            showAddRallySheet = true
-                        }
+                            .onTapGesture {
+                                selectedName = entry.player
+                                selectedStat = entry.stat
+                                showAddRallySheet = true
+                            }
+                    }
                 }
             }
+            
         }
         .toolbar {
-            Button {
-                gameViewModel.doneCreatingRally(
-                    entries: entries,
-                    pointGained: pointGained,
-                    rallyStart: rallyStart,
-                    rotation: rotation)
-                isPresented = false
-            } label: {
-                Text("Done")
+            
+            ToolbarItem(placement: .cancellationAction ) {
+                Button {
+                    gameViewModel.doneCreatingRally(
+                        entries: entries,
+                        pointGained: pointGained,
+                        rallyStart: rallyStart,
+                        rotation: rotation)
+                    isPresented = false
+                } label: {
+                    Text("Done")
+                }
             }
+            
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showAddRallySheet = true
+                } label: {
+                    Text("Add Statistic")
+                }
+            }
+            
         }
         .sheet(isPresented: $showAddRallySheet) {
             // Update the values on dismissal of the sheet
@@ -82,7 +90,8 @@ struct AddRallyView: View {
                 )
             } else {
                 AddRallySheet(
-                    playerNames: gameViewModel.getSelectedPlayers().map({ player in
+                    playerNames:
+                        gameViewModel.getSelectedPlayers().map({ player in
                         player.name
                     }),
                     entries: $entries
@@ -229,10 +238,64 @@ struct AddRallySheet: View {
     }
 }
 
+struct StatisticView: View {
+    
+    @Binding var rotation: Int
+    @Binding var rallyStart: RallyStart
+    @Binding var pointGained: Bool
+    
+    var body: some View {
+        List {
+            Section {
+                Picker("Rotation", selection: $rotation) {
+                    Text("1").tag(1)
+                    Text("2").tag(2)
+                    Text("3").tag(3)
+                    Text("4").tag(4)
+                    Text("5").tag(5)
+                    Text("6").tag(6)
+                }
+                .pickerStyle(.menu)
+            }
+            
+            Section {
+                Picker("Rally start", selection: $rallyStart) {
+                    Text("Serve").tag(RallyStart.serve)
+                    Text("Receive").tag(RallyStart.receive)
+                }
+                .pickerStyle(.menu)
+                
+            }
+            
+            Section {
+                Picker("Won or Lost", selection: $pointGained) {
+                    Text("Won").tag(true)
+                    Text("Lost").tag(false)
+                }
+                .pickerStyle(.menu)
+            }
+            
+        }
+        .scrollDisabled(true)
+    }
+}
+
 #Preview {
     NavigationStack {
         AddRallyView(
             isPresented: .constant(true),
             gameViewModel: GameViewModel.preview)
     }
+}
+
+#Preview("AddRallySheet") {
+    AddRallySheet(
+        playerNames: [VBSConstants.coreDataPlayerName1, VBSConstants.coreDataPlayerName1],
+        selectedName: nil,
+        selectedStat: nil,
+        entries: .constant([PlayerAndStat]()), indexToEdit: 0)
+}
+
+#Preview("StatisticView") {
+    StatisticView(rotation: .constant(1), rallyStart: .constant(.serve), pointGained: .constant(true))
 }

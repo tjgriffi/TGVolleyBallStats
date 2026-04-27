@@ -61,7 +61,7 @@ class Game: Identifiable, Equatable {
     }()
     
     static var emptyExample: Game = {
-       Game(id: UUID(), date: Date(), players: [], sets: [])
+        Game(id: UUID(), date: Date(), players: [], sets: [])
     }()
 }
 

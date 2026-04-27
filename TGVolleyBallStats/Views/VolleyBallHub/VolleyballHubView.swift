@@ -9,8 +9,6 @@ import SwiftUI
 
 struct VolleyballHubView: View {
     
-//    var games: [Game]
-//    var player: Player
     @Environment(\.storageManager) var storageManager
     
     @Environment(\.managedObjectContext) var context
@@ -43,7 +41,6 @@ struct VolleyballHubView: View {
     VolleyballHubView(
         volleyBallHubVM: VolleyBallHubVM(
             playerRepository: CDPlayerRepository(
-                context: StorageManager.preview.container.viewContext,
                 cache: PlayerCache(),
                 storageManager: StorageManager.preview),
             gameRepository: CDGameRepository(

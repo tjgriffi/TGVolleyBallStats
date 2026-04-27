@@ -104,7 +104,6 @@ class GameViewModel {
         GameViewModel(
             game: .emptyExample,
             playerRepository: CDPlayerRepository(
-                context: StorageManager.preview.container.viewContext,
                 cache: PlayerCache(),
                 storageManager: .preview),
             gameRepository: CDGameRepository(
@@ -117,7 +116,6 @@ class GameViewModel {
         GameViewModel(
             game: .noSets,
             playerRepository: CDPlayerRepository(
-                context: StorageManager.preview.container.viewContext,
                 cache: PlayerCache(),
                 storageManager: .preview),
                 gameRepository: CDGameRepository(
@@ -131,7 +129,6 @@ class GameViewModel {
             game: .noSets,
             rallies: Rally.examples,
             playerRepository: CDPlayerRepository(
-                context: StorageManager.preview.container.viewContext,
                 cache: PlayerCache(),
                 storageManager: .preview),
             gameRepository: CDGameRepository(
@@ -292,7 +289,7 @@ class GameViewModel {
     func doneCreatingSetClicked() {
         // Add the set to the list of sets for our game object
 
-        let vSet = VSet.generateSet(withPlayers: players) /*VSet(id: UUID(), rallies: rallies)*/
+        let vSet = VSet(id: UUID(), rallies: rallies)
         game.sets.append(vSet)
         
         self.setValues.append(setupStats(for: vSet, setNumber: setCount))

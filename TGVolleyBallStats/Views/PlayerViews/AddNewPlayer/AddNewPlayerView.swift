@@ -85,7 +85,6 @@ struct AddNewPlayerView: View {
         AddNewPlayerView(
             addNewPlayerVM: AddNewPlayerVM(
                 playerRepository: CDPlayerRepository(
-                    context: StorageManager.preview.container.viewContext,
                     cache: PlayerCache(),
                     storageManager: StorageManager.preview)
             ), shouldViewBeDismissed: .constant(true)

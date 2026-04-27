@@ -58,9 +58,6 @@ struct AddGameView: View {
                         isSetSectionExpanded.toggle()
                     }
                 }
-                TextField("Player name goes here", text: $playerName)
-                    .textFieldStyle(.roundedBorder)
-                    .padding()
                 Button {
                     Task {
                         

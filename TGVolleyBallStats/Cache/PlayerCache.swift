@@ -12,19 +12,15 @@ class PlayerCache: BaseCache {
     typealias T = Player
     
     static let shared = PlayerCache()
-//    private var playerRepository: PlayerRepository
-    private var cache: [UUID: Player]/*NSCache<NSString, Player>*/
+    private var cache: [UUID: Player]
     
-    init(
-//        playerRepository: PlayerRepository = CDPlayerRepository(context: StorageManager.shared.container.viewContext),
-        cache: [UUID: Player] = [:]/*NSCache<NSString, Player> = NSCache<NSString, Player>()*/) {
+    init(cache: [UUID: Player] = [:]) {
         
-//        self.playerRepository = playerRepository
         self.cache = cache
     }
     
     func get(_ id: UUID) -> Player? {
-        return cache[id]/*cache.object(forKey: id.uuidString as NSString)*/
+        return cache[id]
     }
     
     func clear() {

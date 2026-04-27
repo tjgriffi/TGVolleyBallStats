@@ -59,6 +59,7 @@ struct AddSetRallyRow: View {
     
     var body: some View {
         Button {
+            // TODO: Need to show the Rally values when the row is clicked
             showAddRally = true
         } label: {
             Text("R\(rally.rotation), Began with: \(rally.rallyStart.rawValue), Point \(rally.point == 0 ? "Lost" : "Won" )")

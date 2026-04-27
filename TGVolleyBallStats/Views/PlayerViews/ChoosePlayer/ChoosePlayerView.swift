@@ -12,13 +12,37 @@ struct ChoosePlayerView: View {
     @State var choosePlayerVM: ChoosePlayerVM
     @State private var showAddPlayerView: Bool = false
     
+    private var isAddPlayerDisabled: Bool {
+        switch choosePlayerVM.state {
+        case .initial, .empty, .loaded:
+            return false
+        case .loading, .error(_):
+            return true
+        }
+    }
+    
     var body: some View {
         ZStack {
-            List(choosePlayerVM.players) { player in
-                NavigationLink {
-                    PlayerOverviewView(playerDetailsViewModel: PlayerDetailsViewModel(player: player))
-                } label: {
-                    Text(player.name)
+            Group {
+                switch choosePlayerVM.state {
+                case .initial, .empty:
+                    // MARK: Make this more presentable (it looks stale at the moment)
+                    Text("Please add players")
+                case .loading:
+                    ProgressView()
+                case .loaded:
+                    List(choosePlayerVM.players) { player in
+                        NavigationLink {
+                            PlayerOverviewView(playerDetailsViewModel: PlayerDetailsViewModel(player: player))
+                        } label: {
+                            Text(player.name)
+                        }
+                    }
+                    .refreshable {
+                        choosePlayerVM.getPlayers()
+                    }
+                case .error(let string):
+                    Text("Error: \(string)")
                 }
             }
             .task {
@@ -35,7 +59,7 @@ struct ChoosePlayerView: View {
                             Text("Add Player")
                         }
                     }
-                    
+                    .disabled(isAddPlayerDisabled)
                 }
             }
             .onChange(of: showAddPlayerView) { oldValue, newValue in
@@ -70,7 +94,7 @@ struct ChoosePlayerView: View {
     NavigationStack {
         ChoosePlayerView(
             choosePlayerVM: ChoosePlayerVM(playerRepository: CDPlayerRepository(
-                context: StorageManager.preview.container.viewContext)
+                storageManager: StorageManager.preview)
             ))
             .environment(\.managedObjectContext, StorageManager.preview.container.viewContext)
     }

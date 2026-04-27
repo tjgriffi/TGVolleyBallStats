@@ -72,7 +72,6 @@ struct GameHubView: View {
                 gameRepository: CDGameRepository(
                     storageManager: StorageManager.preview, cache: GameCache()),
                 playerRepository: CDPlayerRepository(
-                    context: StorageManager.preview.container.viewContext,
                     cache: PlayerCache(),
                     storageManager: .preview)))
     }

@@ -30,7 +30,7 @@ struct StorageManager {
     
     let container: NSPersistentContainer
     
-    init(inMemory: Bool = false) {
+    private init(inMemory: Bool = false) {
         
         container = NSPersistentContainer(name: "TGVolleyBallStatsApp")
         
@@ -80,7 +80,7 @@ struct StorageManager {
         
         (1...3).forEach({ index in
             var stat = CDPlayerDateStat(
-                date: Date(timeInterval: Double(60 * 60 * 10 * index), since: Date()),
+                date: Date(timeInterval: Double(60 * 60 * 24 * index), since: Date()),
                 digRating: .random(in: (0...1)),
                 passRating: .random(in: (0...1)),
                 killPercentage: .random(in: (0...1)),
@@ -91,7 +91,7 @@ struct StorageManager {
             stats1.append(stat)
             
             stat = CDPlayerDateStat(
-                date: Date(timeInterval: Double(60 * 60 * 10 * index), since: Date()),
+                date: Date(timeInterval: Double(60 * 60 * 24 * index), since: Date()),
                 digRating: .random(in: (0...1)),
                 passRating: .random(in: (0...1)),
                 killPercentage: .random(in: (0...1)),

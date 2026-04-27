@@ -15,7 +15,7 @@ struct TGVolleyBallStatsApp: App {
     var body: some Scene {
         WindowGroup {
             VolleyballHubView(volleyBallHubVM: VolleyBallHubVM(
-                playerRepository: CDPlayerRepository(context: storageManager.container.viewContext),
+                playerRepository: CDPlayerRepository(),
                 gameRepository: CDGameRepository()))
                 .environment(\.managedObjectContext, storageManager.container.viewContext)
                 .environment(\.storageManager, storageManager)

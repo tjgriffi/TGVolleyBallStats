@@ -45,10 +45,9 @@ class CDPlayerRepository: PlayerRepository {
     
     private var cache: any BaseCache<Player>
     
-    init(context: NSManagedObjectContext,
-         cache: any BaseCache<Player> = PlayerCache.shared,
+    init(cache: any BaseCache<Player> = PlayerCache.shared,
          storageManager: StorageManager = StorageManager.shared) {
-        self.context = context
+             self.context = storageManager.container.viewContext
         
         // Have a default playerDateStatRepository for dependency injection
         self.cache = cache

@@ -42,7 +42,6 @@ class AddNewPlayerVM {
         
         
         guard name.count > 0, state != .loading else {
-            print("addNewPlayer: stopped at guard statement")
             return
         }
         
