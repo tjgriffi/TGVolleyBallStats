@@ -15,6 +15,7 @@ protocol BaseCache<T>{
     func remove(_ key: UUID)
     func clear()
     func getAll() -> [T]
+    func size() -> Int
 }
 
 

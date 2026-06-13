@@ -41,4 +41,8 @@ class GameCache: BaseCache {
     func getAll() -> [Game] {
         return Array(cache.values)
     }
+    
+    func size() -> Int {
+        return cache.count
+    }
 }
