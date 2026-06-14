@@ -180,41 +180,24 @@ struct AddRallySheet: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Names") {
+                
+                Picker("Names",selection: $selectedName) {
+                    
                     ForEach(playerNames, id: \.self) { name in
-                        HStack {
-                            Text(name)
-                            
-                            Spacer()
-                            
-                            if selectedName == name {
-                                Image(systemName: "checkmark")
-                            }
-                        }
-                        .onTapGesture {
-                            selectedName = name
-                        }
+                        Text(name)
+                            .tag(name)
                     }
                 }
+                .pickerStyle(.inline)
                 
-                Section("Stats") {
+                Picker("Stats", selection: $selectedStat) {
                     
                     ForEach(Stats.allCases) { stat in
-                        
-                        HStack {
-                            Text(stat.rawValue)
-                            
-                            Spacer()
-                            
-                            if selectedStat == stat {
-                                Image(systemName: "checkmark")
-                            }
-                        }
-                        .onTapGesture {
-                            selectedStat = stat
-                        }
+                        Text(stat.rawValue)
+                            .tag(stat)
                     }
                 }
+                .pickerStyle(.inline)
             }
             .navigationTitle("Add Stat")
             .toolbar {
@@ -290,7 +273,7 @@ struct StatisticView: View {
 
 #Preview("AddRallySheet") {
     AddRallySheet(
-        playerNames: [VBSConstants.coreDataPlayerName1, VBSConstants.coreDataPlayerName1],
+        playerNames: [VBSConstants.coreDataPlayerName1, VBSConstants.coreDataPlayerName2],
         selectedName: nil,
         selectedStat: nil,
         entries: .constant([PlayerAndStat]()), indexToEdit: 0)
