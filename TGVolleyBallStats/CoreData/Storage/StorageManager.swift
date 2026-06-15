@@ -103,8 +103,8 @@ struct StorageManager {
         })
         
         // Setup a game
-        let game1 = CDGame(date: Date(timeInterval: 60 * 60 * 13 * 7, since: .now) , context: context)
-        let game2 = CDGame(date: Date(timeInterval: 60 * 60 * 13 * 4, since: .now) , context: context)
+        let game1 = CDGame(date: Date(timeInterval: 60 * 60 * 13 * 7, since: .now), isFinished: true, context: context)
+        let game2 = CDGame(date: Date(timeInterval: 60 * 60 * 13 * 4, since: .now), isFinished: true, context: context)
         
         // Setup the set
         let set1 = CDVSet(context: context)

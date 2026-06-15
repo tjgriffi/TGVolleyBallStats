@@ -16,12 +16,14 @@ class Game: Identifiable, Equatable {
     let date: Date
     var playerIDs: [UUID]
     var sets: [VSet] = []
+    var isFinished: Bool
     
-    init(id: UUID, date: Date, players: [UUID], sets: [VSet]) {
+    init(id: UUID, date: Date, players: [UUID], sets: [VSet], isFinished: Bool = false) {
         self.id = id
         self.date = date
         self.playerIDs = players
         self.sets = sets
+        self.isFinished = isFinished
     }
     
     init(from cdGame: CDGame){
@@ -30,6 +32,7 @@ class Game: Identifiable, Equatable {
         self.id = cdGame.uuid
         self.date = cdGame.date
         self.playerIDs = []
+        self.isFinished = cdGame.isFinished
         
                 
         cdGame.sets.forEach { cdVSet in

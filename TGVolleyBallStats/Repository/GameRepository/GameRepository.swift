@@ -61,7 +61,7 @@ class CDGameRepository: GameRepository {
         do {
             
             // Save the game
-            let cdGame = CDGame(date: game.date, context: context)
+            let cdGame = CDGame(date: game.date, isFinished: game.isFinished, context: context)
             
             // Save the game's sets
             let cdVSets = game.sets.map { set in

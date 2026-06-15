@@ -36,12 +36,20 @@ extension CDGame {
         set { vSets_ = newValue as NSSet }
     }
     
+    var isFinished: Bool {
+        
+        get { isFinished_ ?? false }
+        set { isFinished_ = newValue }
+    }
+    
     // MARK: Initial setup
     override public func awakeFromInsert() {
         self.uuid_ = UUID()
     }
     
-    convenience init(date: Date, context: NSManagedObjectContext) {
+    convenience init(date: Date,
+                     isFinished: Bool,
+                     context: NSManagedObjectContext) {
         self.init(context: context)
         self.date = date
     }
@@ -56,8 +64,6 @@ extension CDGame {
         
         let request = CDGame.fetchRequest()
         
-//        request.sortDescriptors = [NSSortDescriptor(key: "\(\CDGame.date_)", ascending: true)]
-        
         request.predicate = predicate
         
         return request
@@ -68,7 +74,7 @@ extension CDGame {
         
         let context = StorageManager.preview.container.viewContext
         
-        let game = CDGame(date: Date(), context: context)
+        let game = CDGame(date: Date(), isFinished: true, context: context)
         
         // Setup the set
         let set1 = CDVSet(context: context)
