@@ -20,7 +20,7 @@ struct AddSetView: View {
             // Show a list of current Rallies
             List {
                 Section("Rally Results") {
-                    ForEach(gameViewModel.rallies, id: \.id) { rally in
+                    ForEach(gameViewModel.selectedVSet?.rallies ?? [], id: \.id) { rally in
                         AddSetRallyRow(rally: rally, showAddRally: $showAddRallyView)
                     }
                 }

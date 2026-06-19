@@ -9,7 +9,7 @@ import SwiftUI
 
 struct GameHubView: View {
     @State var gameHubViewModel: GameHubViewModel
-    @State var newGamedAdded: Bool = false
+    @State var wasGamesUpdated: Bool = false
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -17,10 +17,10 @@ struct GameHubView: View {
                 ForEach(gameHubViewModel.games) { game in
                     NavigationLink {
                         GameView(
-                            gameViewModel: GameViewModel(
-                                game: game,
-                                playerRepository: gameHubViewModel.playerRepository,
-                                gameRepository: gameHubViewModel.gameRepository))
+                            gameViewModel: GameViewModel(game: game,
+                                                         playerRepository: gameHubViewModel.playerRepository,
+                                                         gameRepository: gameHubViewModel.gameRepository),
+                            wasGamesUpdated: $wasGamesUpdated)
                     } label: {
                         GameHubListCell(game: game)
                     }
@@ -39,10 +39,8 @@ struct GameHubView: View {
                                 sets: []),
                             playerRepository: gameHubViewModel.playerRepository,
                             gameRepository: gameHubViewModel.gameRepository),
-//                        gameViewModel: .previewNoSetsFullRally,
-                        newGameAdded: $newGamedAdded)
+                        wasGamesUpdated: $wasGamesUpdated)
                 } label: {
-//                        AddGameListView()
                     Image(systemName: "plus.circle.fill")
                         .foregroundStyle(.blue)
                 }
@@ -53,14 +51,14 @@ struct GameHubView: View {
         .task {
             gameHubViewModel.loadGames()
         }
-        .onChange(of: newGamedAdded) { oldValue, newValue in
+        .onChange(of: wasGamesUpdated) { oldValue, newValue in
             if newValue == true {
                 Task {
                     gameHubViewModel.loadGames()
                 }
             }
             
-            newGamedAdded = false
+            wasGamesUpdated = false
         }
     }
 }

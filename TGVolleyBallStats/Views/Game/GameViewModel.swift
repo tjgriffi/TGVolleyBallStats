@@ -34,6 +34,8 @@ class GameViewModel {
     private var gameSaved: Bool = false
     private var playersSaved: Bool = false
     
+    private(set) var selectedVSet: VSet? // The Set that is being edited
+    
     func toggleSelectedPlayers(player: Player) {
         if selectedPlayers.contains(player.id) {
             selectedPlayers.remove(player.id)
@@ -51,8 +53,14 @@ class GameViewModel {
     
     private var gameRepository: GameRepository
     
-    struct SetValues: Identifiable {
-        let id: Int
+    struct RotationValues: Hashable {
+        let rotation: Int
+        var pointsGained: Int
+    }
+    
+    struct SetValues: Identifiable, Hashable {
+        let id: UUID
+        let setNumber: Int
         let kills: Int
         let digs: Int
         let aces: Int
@@ -70,28 +78,52 @@ class GameViewModel {
         let shanks: Int
         let serveErrors: Int
         let rallySore: RallyFinalScore
-        let bestRotation: (rotation: Int, pointsGained: Int)
-        let worstRotation: (rotation: Int, pointsLost: Int)
+        let bestRotation: RotationValues
+        let worstRotation: RotationValues
+        
+        static var emptySetValues: SetValues = {
+            SetValues.init(
+                id: UUID(),
+                setNumber: 0,
+                kills: 0,
+                digs: 0,
+                aces: 0,
+                passes: 0,
+                spikes: 0,
+                freeBall: 0,
+                killBlocks: 0,
+                freeballKills: 0,
+                touches: 0,
+                blocks: 0,
+                hittingErrors: 0,
+                blockingErrors: 0,
+                settingErrors: 0,
+                freeBallErrors: 0,
+                shanks: 0,
+                serveErrors: 0,
+                rallySore: .init(home: 0, away: 0),
+                bestRotation: RotationValues(rotation: 0, pointsGained: 0),
+                worstRotation: RotationValues(rotation: 0, pointsGained: 0))
+        }()
     }
     
     // MARK: Rallies is for testing purposes
     init(game: Game,
          rallies: [Rally] = [],
+         selectedVSet: VSet? = nil,
          playerRepository: PlayerRepository,
          gameRepository: GameRepository) {
         
         self.game = game
         self.setValues = []
         self.rallies = rallies
+        self.selectedVSet = selectedVSet
         self.playerRepository = playerRepository
         self.gameRepository = gameRepository
         players = playerRepository.getPlayers()
         
         self.game.sets.forEach { [weak self] set in
-            self?.setValues.append(self?.setupStats(for: set, setNumber: self?.setCount ?? 1) ?? SetValues.init(
-            id: 0, kills: 0, digs: 0, aces: 0, passes: 0, spikes: 0, freeBall: 0, killBlocks: 0, freeballKills: 0, touches: 0, blocks: 0, hittingErrors: 0, blockingErrors: 0, settingErrors: 0, freeBallErrors: 0, shanks: 0, serveErrors: 0, rallySore: .init(home: 0, away: 0), bestRotation: (0,0), worstRotation: (0,0)
-        )
-            )
+            self?.setValues.append(self?.setupStats(for: set, setNumber: self?.setCount ?? 1) ?? .emptySetValues)
             self?.setCount += 1
         }
     }
@@ -158,16 +190,16 @@ class GameViewModel {
         var passes = 0
         var homeScore = 0
         var awayScore = 0
-        var rotation: [Int: (pointsGained: Int, pointsLost: Int)] = [:]
+        var rotation: [Int: RotationValues] = [:]
         
         for rally in set.rallies {
             
             if rally.point == 0 {
                 awayScore += 1
-                rotation[rally.rotation, default: (pointsGained: 0, pointsLost: 0)].pointsLost += 1
+                rotation[rally.rotation, default: RotationValues(rotation: 0, pointsGained: 0)].pointsGained -= 1
             } else {
                 homeScore += 1
-                rotation[rally.rotation, default: (pointsGained: 0, pointsLost: 0)].pointsGained += 1
+                rotation[rally.rotation, default: RotationValues(rotation: 0, pointsGained: 0)].pointsGained += 1
             }
             
             for playerStat in rally.stats {
@@ -242,26 +274,27 @@ class GameViewModel {
             }
         }
         
-        var bestRotation: (rotation: Int, pointsGained: Int) = (1,0)
-        var worstRotation: (rotation: Int, pointsLost: Int) = (1,0)
+        var bestRotation = RotationValues(rotation: 1, pointsGained: 0)
+        var worstRotation = RotationValues(rotation: 1, pointsGained: 0)
         
         rotation.forEach { keyValue in
             if bestRotation.pointsGained < keyValue.value.pointsGained {
-                bestRotation = (
+                bestRotation = RotationValues (
                     rotation: keyValue.key,
                     pointsGained: keyValue.value.pointsGained
                 )
             }
             
-            if worstRotation.pointsLost < keyValue.value.pointsLost {
-                worstRotation = (
+            if worstRotation.pointsGained > keyValue.value.pointsGained {
+                worstRotation = RotationValues (
                     rotation: keyValue.key,
-                    pointsLost: keyValue.value.pointsLost)
+                    pointsGained: keyValue.value.pointsGained)
             }
         }
         
         return SetValues(
-            id: setNumber,
+            id: set.id,
+            setNumber: setNumber,
             kills: kills,
             digs: digs,
             aces: aces,
@@ -287,17 +320,36 @@ class GameViewModel {
     }
 
     func doneCreatingSetClicked() {
-        // Add the set to the list of sets for our game object
-
-        let vSet = VSet(id: UUID(), rallies: rallies)
-        game.sets.append(vSet)
         
-        self.setValues.append(setupStats(for: vSet, setNumber: setCount))
-        setCount += 1
+        // Check that a selected set is present
+        guard let selectedVSet else {
+            // TODO: Add some error handling
+            return
+        }
+        
+        // See if the set is already in our game
+        if let modifiedSetIndex = game.sets.firstIndex(where: { $0.id == selectedVSet.id }) {
+            
+            // Replace the set with the modified selected set
+            game.sets[modifiedSetIndex] = selectedVSet
+            setValues[modifiedSetIndex] = setupStats(for: selectedVSet, setNumber: modifiedSetIndex + 1)
+        } else {
+            // Add the set to our game's sets
+            game.sets.append(selectedVSet)
+            setValues.append(setupStats(for: selectedVSet, setNumber: game.sets.count))
+        }
+        
+        // Add the set to the list of sets for our game object
+//        let vSet = VSet(id: UUID(), rallies: rallies)
+//        game.sets.append(vSet)
+//        
+//        self.setValues.append(setupStats(for: vSet, setNumber: setCount))
+//        setCount += 1
         
         // Reset all of the other values
-        currentRotation = 1
-        rallies.removeAll()
+//        currentRotation = 1
+        self.selectedVSet = nil
+//        rallies.removeAll()
     }
         
     func doneCreatingRally(entries: [PlayerAndStat], pointGained: Bool, rallyStart: RallyStart, rotation: Int) {
@@ -388,6 +440,11 @@ class GameViewModel {
         guard state != .saving else { return }
         
         state = .initial
+    }
+    
+    // Action received from a view
+    func selectedVSet(with setValues: SetValues) {
+        selectedVSet = game.sets.first(where: { $0.id == setValues.id })
     }
 }
 

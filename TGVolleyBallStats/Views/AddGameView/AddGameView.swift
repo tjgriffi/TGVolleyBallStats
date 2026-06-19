@@ -13,7 +13,7 @@ struct AddGameView: View {
     
     let gameViewModel: GameViewModel
     @State var playerName: String = ""
-    @Binding var newGameAdded: Bool
+    @Binding var wasGamesUpdated: Bool
     @State var selectedPlayers = [UUID]()
     @State var isPlayersSectionExpanded: Bool = true
     @State var isSetSectionExpanded: Bool = true
@@ -108,7 +108,7 @@ struct AddGameView: View {
                     VStack {
                         Text("Game was successfully saved!!")
                         Button {
-                            newGameAdded.toggle()
+                            wasGamesUpdated.toggle()
                             dismiss()
                         } label: {
                             Text("Done")
@@ -142,7 +142,7 @@ struct AddGameView: View {
 
 #Preview("Add game view") {
     NavigationStack {
-        AddGameView(gameViewModel: GameViewModel.preview, newGameAdded: .constant(false))
+        AddGameView(gameViewModel: GameViewModel.preview, wasGamesUpdated: .constant(false))
     }
 }
 
